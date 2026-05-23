@@ -1,0 +1,118 @@
+import { motion } from "framer-motion";
+import { HeartPulse, BookOpen, Wallet, ShoppingCart, Factory, Home, Plane, Rocket } from "lucide-react";
+
+const industries = [
+  {
+    icon: <HeartPulse className="w-8 h-8 text-blue-600" />,
+    title: "Healthcare",
+    description: "Innovative technology solutions for healthcare providers and medical institutions.",
+    solutions: ["Telemedicine", "EHR Systems", "Patient Portals", "Healthcare Analytics"]
+  },
+  {
+    icon: <BookOpen className="w-8 h-8 text-blue-600" />,
+    title: "Education",
+    description: "Digital transformation for educational institutions and e-learning platforms.",
+    solutions: ["LMS Integration", "E-learning Apps", "Student Portals", "Virtual Classrooms"]
+  },
+  {
+    icon: <Wallet className="w-8 h-8 text-blue-600" />,
+    title: "Finance",
+    description: "Secure and scalable financial technology solutions for modern banking.",
+    solutions: ["Mobile Banking", "Payment Gateways", "Wealth Management", "Blockchain"]
+  },
+  {
+    icon: <ShoppingCart className="w-8 h-8 text-blue-600" />,
+    title: "E-commerce",
+    description: "Custom e-commerce solutions to grow your online business.",
+    solutions: ["Online Stores", "Marketplace", "Inventory Management", "Payment Integration"]
+  },
+  {
+    icon: <Factory className="w-8 h-8 text-blue-600" />,
+    title: "Manufacturing",
+    description: "Industry 4.0 solutions for smart manufacturing and supply chain.",
+    solutions: ["IoT Integration", "Inventory Tracking", "Quality Control", "Supply Chain"]
+  },
+  {
+    icon: <Home className="w-8 h-8 text-blue-600" />,
+    title: "Real Estate",
+    description: "Digital solutions for property management and real estate businesses.",
+    solutions: ["Property Portals", "Virtual Tours", "CRM Systems", "Lease Management"]
+  },
+  {
+    icon: <Plane className="w-8 h-8 text-blue-600" />,
+    title: "Travel & Hospitality",
+    description: "Technology solutions for travel agencies and hospitality businesses.",
+    solutions: ["Booking Systems", "Travel Portals", "Hotel Management", "CRM Solutions"]
+  },
+  {
+    icon: <Rocket className="w-8 h-8 text-blue-600" />,
+    title: "Startups",
+    description: "Scalable technology solutions for fast-growing startups.",
+    solutions: ["MVP Development", "Web & Mobile Apps", "Cloud Solutions", "UI/UX Design"]
+  }
+];
+
+export function IndustriesSection() {
+  return (
+    <section className="py-16 bg-gradient-subtle">
+      <div className="container mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <span className="text-blue-600 text-sm font-medium tracking-wider uppercase mb-4 block">
+            Our Expertise
+          </span>
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-4">
+            Our Industries
+          </h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            We deliver tailored technology solutions across various industries to help businesses thrive in the digital age.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {industries.map((industry, index) => (
+            <motion.div
+              key={industry.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
+              className="group relative bg-white p-6 rounded-xl border border-gray-200 hover:border-blue-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative z-10">
+                <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-blue-50 group-hover:bg-white group-hover:shadow-md transition-all duration-300 mb-4">
+                  {industry.icon}
+                </div>
+                <h3 className="text-xl font-heading font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300 mb-3">
+                  {industry.title}
+                </h3>
+                <p className="text-gray-600 group-hover:text-gray-800 transition-colors duration-300 mb-4">
+                  {industry.description}
+                </p>
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">Key Solutions:</h4>
+                  <ul className="space-y-1.5">
+                    {industry.solutions.map((solution, i) => (
+                      <li key={i} className="text-sm text-gray-600 flex items-start">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 mr-2 flex-shrink-0"></span>
+                        <span>{solution}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <div className="absolute inset-0 transform scale-95 group-hover:scale-100 transition-transform duration-300 -z-10"></div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
