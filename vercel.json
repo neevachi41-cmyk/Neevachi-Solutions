@@ -5,9 +5,9 @@
             "routePrefix": "/",
             "framework": "vite"
         },
-        "backend": {
-            "root": "backend",
-            "routePrefix": "/_/backend"
+        "api": {
+            "root": "api",
+            "routePrefix": "/_/api"
         }
     }
 }

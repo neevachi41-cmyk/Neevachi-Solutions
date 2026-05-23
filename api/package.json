@@ -1,10 +1,25 @@
 {
   "name": "neevachi-api",
   "version": "1.0.0",
-  "description": "API functions for Vercel deployment",
-  "main": "index.js",
+  "description": "Backend API for Neevachi",
+  "main": "server.js",
   "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
   "dependencies": {
-    "jsonwebtoken": "^9.0.3"
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.1.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.16.5",
+    "nodemon": "^3.0.3"
   }
 }
