@@ -9,7 +9,7 @@
             "root": "api",
             "routePrefix": "/_/api",
             "builder": "vercel/static",
-            "runtime": "nodejs18.x",
+            "runtime": "nodejs",
             "entrypoint": "server.js"
         }
     }
