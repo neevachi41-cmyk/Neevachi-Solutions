@@ -90,7 +90,7 @@ const Workflow = () => {
           >
             <Link 
               to="/services" 
-              className="inline-flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-300 mb-6 group backdrop-blur-sm"
+              className="inline-flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-300 mb-6 group"
             >
               <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
               Back to Services

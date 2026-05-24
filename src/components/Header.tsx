@@ -182,7 +182,7 @@ export function Header() {
                 
                 <NavLink 
                   to="/register" 
-                  className="ml-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-gradient-to-r from-primary to-secondary text-white relative"
+                  className="ml-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white relative"
                 >
                   <span className="flex items-center justify-center gap-1.5">
                     Get Started
@@ -286,7 +286,7 @@ export function Header() {
                   </Link>
                   <Link
                     to="/register"
-                    className="block w-full text-center px-4 py-3 text-base font-medium text-white bg-gradient-to-r from-primary to-secondary rounded-lg hover:opacity-90 transition-opacity"
+                    className="block w-full text-center px-4 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Get Started

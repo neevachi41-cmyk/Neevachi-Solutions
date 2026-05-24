@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { Product, products } from '@/types/product';
 import { CustomProductModal } from '../components/CustomProductModal';
@@ -322,15 +323,12 @@ const ProductCard = ({ product }: { product: Product }) => {
               </span>
             )}
           </div>
-          <button 
+          <Link 
+            to={`/shop/product/${product.id}`}
             className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full transition-colors active:scale-95"
-            onClick={() => {
-              console.log('Added to cart:', product.name);
-              alert(`${product.name} added to cart!`);
-            }}
           >
             <ShoppingCart className="w-5 h-5" />
-          </button>
+          </Link>
         </div>
       </div>
     </div>

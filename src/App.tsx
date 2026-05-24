@@ -18,6 +18,7 @@ import Contact from './pages/Contact';
 import Index from './pages/Index';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
+import ProductDetail from './pages/ProductDetail';
 import ProjectDetailTemp from './pages/ProjectDetailTemp';
 import Projects from './pages/Projects';
 import Quotes from './pages/Quotes';
@@ -66,6 +67,7 @@ const App: React.FC = () => {
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/shop" element={<Shop />} />
+                  <Route path="/shop/product/:productId" element={<ProductDetail />} />
                   <Route path="/all-projects" element={<AllProjects />} />
                   
                   {/* Protected routes */}
