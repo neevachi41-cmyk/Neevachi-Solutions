@@ -2,12 +2,19 @@ import { motion } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
 
-import { CheckCircle, MessageSquare, Rocket, Star, Award, Zap } from 'lucide-react';
+import { CheckCircle, MessageSquare, Rocket, Star, Award, Zap, Cpu, Truck, Wrench, Box } from 'lucide-react';
 
 const badges = [
-  { icon: Rocket, text: "50+ Projects Delivered" },
-  { icon: CheckCircle, text: "35+ Happy Clients" },
-  { icon: MessageSquare, text: "24/7 Support" },
+  { icon: Rocket, text: "50+ Projects Delivered", color: "bg-blue-50 border-blue-200 hover:border-blue-300", iconColor: "text-blue-600" },
+  { icon: CheckCircle, text: "35+ Happy Clients", color: "bg-green-50 border-green-200 hover:border-green-300", iconColor: "text-green-600" },
+  { icon: MessageSquare, text: "24/7 Support", color: "bg-purple-50 border-purple-200 hover:border-purple-300", iconColor: "text-purple-600" },
+];
+
+const services = [
+  { icon: Cpu, text: "Robotics Parts", description: "High-quality components" },
+  { icon: Truck, text: "Supply Chain Management", description: "Efficient logistics" },
+  { icon: Wrench, text: "Machining Services", description: "Precision engineering" },
+  { icon: Box, text: "3D Printing Services", description: "Rapid prototyping" },
 ];
 
 export function HeroSection() {
@@ -129,7 +136,7 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.6 }}
-            className="flex flex-wrap items-center justify-center gap-4 md:gap-8"
+            className="flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-16"
           >
             {badges.map((badge, index) => (
               <motion.div
@@ -137,10 +144,36 @@ export function HeroSection() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 1 + index * 0.1, duration: 0.5 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:shadow transition-all duration-200"
+                className={`flex items-center gap-3 px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 ${badge.color}`}
               >
-                <badge.icon className="w-5 h-5 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">{badge.text}</span>
+                <badge.icon className={`w-6 h-6 ${badge.iconColor}`} />
+                <span className="text-base font-semibold text-gray-800">{badge.text}</span>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* Service cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1, duration: 0.8 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto"
+          >
+            {services.map((service, index) => (
+              <motion.div
+                key={service.text}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2 + index * 0.1, duration: 0.5 }}
+                className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-gray-300 group"
+              >
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4 group-hover:bg-gray-100 transition-colors duration-300">
+                    <service.icon className="w-8 h-8 text-gray-900" />
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-2">{service.text}</h3>
+                  <p className="text-sm text-gray-600">{service.description}</p>
+                </div>
               </motion.div>
             ))}
           </motion.div>

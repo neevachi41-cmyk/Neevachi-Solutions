@@ -169,46 +169,46 @@ export default function Shop() {
           </div>
         </div>
         
-        {/* Regular Products Section */}
-        <div className="mb-8">
+        {/* Regular Products Section - Only show when a specific category is selected */}
+        {selectedCategory !== 'all' && (
+          <div className="mb-8">
 
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center space-x-4">
-              <h2 className="text-xl font-semibold">
-                {selectedCategory === 'all' 
-                  ? 'All Products' 
-                  : categories.find(c => c.id === selectedCategory)?.name}
-                <span className="text-sm text-gray-500 ml-2">({filteredProducts.length})</span>
-              </h2>
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center space-x-4">
+                <h2 className="text-xl font-semibold">
+                  {categories.find(c => c.id === selectedCategory)?.name}
+                  <span className="text-sm text-gray-500 ml-2">({filteredProducts.length})</span>
+                </h2>
+              </div>
+              <div className="flex items-center">
+                <label htmlFor="sort" className="text-sm text-gray-600 mr-2">Sort by:</label>
+                <select
+                  id="sort"
+                  className="border rounded p-1.5 text-sm"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="featured">Featured</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="rating">Highest Rated</option>
+                </select>
+              </div>
             </div>
-            <div className="flex items-center">
-              <label htmlFor="sort" className="text-sm text-gray-600 mr-2">Sort by:</label>
-              <select
-                id="sort"
-                className="border rounded p-1.5 text-sm"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="featured">Featured</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="rating">Highest Rated</option>
-              </select>
-            </div>
+
+            {sortedProducts.length === 0 ? (
+              <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+                <p className="text-gray-500">No products found. Try adjusting your filters.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {sortedProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
           </div>
-
-          {sortedProducts.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <p className="text-gray-500">No products found. Try adjusting your filters.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {sortedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Custom Products Section */}
         <div className="mt-16 mb-12">
