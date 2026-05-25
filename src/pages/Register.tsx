@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 
 import { cn } from '@/lib/utils';
 
-import { User, Mail, Lock, Eye, EyeOff, Loader2, Github, Facebook, Mail as Google } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, Loader2, X, Facebook, Mail as Google } from 'lucide-react';
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -57,12 +57,12 @@ const Register = () => {
     }
   };
 
-  const handleSocialLogin = (provider: 'github' | 'google' | 'facebook') => {
+  const handleSocialLogin = (provider: 'x' | 'google' | 'facebook') => {
     console.log(`Login with ${provider}`);
     // Redirect to the appropriate OAuth URL
     // You'll need to set up these environment variables in your .env file
     const oauthUrls = {
-      github: `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/auth/github`,
+      x: `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/auth/x`,
       google: `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/auth/google`,
       facebook: `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/auth/facebook`
     };
@@ -257,10 +257,10 @@ const Register = () => {
                 type="button"
                 variant="outline"
                 className="w-full flex items-center justify-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-50"
-                onClick={() => handleSocialLogin('github')}
+                onClick={() => handleSocialLogin('x')}
               >
-                <Github className="w-5 h-5" />
-                Continue with GitHub
+                <X className="w-5 h-5" />
+                Continue with X
               </Button>
             </div>
           </div>
