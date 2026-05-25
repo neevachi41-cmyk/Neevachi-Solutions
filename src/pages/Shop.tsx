@@ -1,19 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Product, products } from '@/types/product';
+import { Product, products, categories } from '@/types/product';
 import { CustomProductModal } from '../components/CustomProductModal';
 
 import { Filter, Heart, Plus, Search, ShoppingCart, Star, X } from 'lucide-react';
-
-// Define categories with their counts
-const categories = [
-  { id: 'all', name: 'All Products', count: products.length },
-  { id: 'electronics', name: 'Electronics', count: products.filter(p => p.category === 'electronics').length },
-  { id: 'clothing', name: 'Clothing', count: products.filter(p => p.category === 'clothing').length },
-  { id: 'home', name: 'Home & Living', count: products.filter(p => p.category === 'home').length },
-  { id: 'beauty', name: 'Beauty', count: products.filter(p => p.category === 'beauty').length },
-];
 
 export default function Shop() {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -147,27 +138,39 @@ export default function Shop() {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Our Products</h1>
         
-        {/* Regular Products Section */}
-        <div className="mb-8">
-          {/* Category Buttons */}
-          <div className="flex flex-wrap gap-2 mb-6">
+        {/* Category Cards Section */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">Browse by Category</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {categories.map((category) => (
-              <button
+              <div
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`cursor-pointer rounded-lg overflow-hidden transition-all hover:shadow-lg ${
                   selectedCategory === category.id
-                    ? 'bg-primary text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'ring-2 ring-blue-600 shadow-lg'
+                    : 'hover:shadow-md'
                 }`}
               >
-                {category.name}
-                <span className="ml-1.5 px-1.5 py-0.5 bg-white/20 rounded-full text-xs">
-                  {category.count}
-                </span>
-              </button>
+                <div className="relative h-32">
+                  <img
+                    src={category.image}
+                    alt={category.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <h3 className="text-white font-semibold text-sm truncate">{category.name}</h3>
+                    <p className="text-white/80 text-xs">{category.count} products</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
+        </div>
+        
+        {/* Regular Products Section */}
+        <div className="mb-8">
 
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center space-x-4">
