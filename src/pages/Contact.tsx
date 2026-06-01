@@ -14,22 +14,22 @@ const contactInfo = [
   {
     icon: MapPin,
     title: "Office Address",
-    details: "123 Tech Park, Pune, Maharashtra 411045, India"
+    details: "Flat No. S No 50, Survey Number :50, Office No 1 15/1, Samarth Sankul near Bank of Maharashtra, Pune Pune, MAHARASHTRA, 411041"
   },
   {
     icon: Phone,
     title: "Phone Number",
-    details: "+91 98765 43210"
+    details: "+91 9922552891, +91 9403497065"
   },
   {
     icon: Mail,
     title: "Email Address",
-    details: "info@neevachisolutions.com"
+    details: "info@neevachi.in"
   },
   {
     icon: Clock,
-    title: "Business Hours",
-    details: "Mon - Fri: 9:00 AM - 6:00 PM IST"
+    title: "GSTIN",
+    details: "27GYTPM3198G1ZK"
   }
 ];
 

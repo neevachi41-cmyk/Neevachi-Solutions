@@ -212,6 +212,64 @@ const About = () => {
       </section>
 
       {/* CTA Section */}
+      {/* Contact Information */}
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="container mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Contact Information</h2>
+            <p className="text-gray-600">Get in touch with us for any inquiries or project requirements</p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              className="bg-white p-6 rounded-lg shadow-sm"
+            >
+              <h3 className="font-semibold text-gray-900 mb-2">Address</h3>
+              <p className="text-gray-600 text-sm">Flat No. S No 50, Survey Number :50, Office No 1 15/1, Samarth Sankul near Bank of Maharashtra, Pune Pune, MAHARASHTRA, 411041</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="bg-white p-6 rounded-lg shadow-sm"
+            >
+              <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
+              <p className="text-gray-600 text-sm">info@neevachi.in</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="bg-white p-6 rounded-lg shadow-sm"
+            >
+              <h3 className="font-semibold text-gray-900 mb-2">Contact</h3>
+              <p className="text-gray-600 text-sm">+91 9922552891, +91 9403497065</p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="bg-white p-6 rounded-lg shadow-sm"
+            >
+              <h3 className="font-semibold text-gray-900 mb-2">GSTIN</h3>
+              <p className="text-gray-600 text-sm">27GYTPM3198G1ZK</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       <section className="py-20 px-4 bg-white">
         <div className="container mx-auto max-w-4xl text-center">
           <motion.div
@@ -224,8 +282,8 @@ const About = () => {
             <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto">
               Let's bring your ideas to life. Contact us today to discuss your project and see how we can help you achieve your goals.
             </p>
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="px-8 h-14 text-base font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
             >
               Get in Touch

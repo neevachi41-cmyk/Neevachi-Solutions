@@ -2,23 +2,38 @@ import { Github, Linkedin, Mail, Twitter, Zap } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="py-12 px-4 bg-[#0E3995] border-t border-[#0E3995] shadow-sm">
+    <footer className="py-8 px-4 bg-[#0E3995] border-t border-[#0E3995] shadow-sm">
       <div className="container mx-auto max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
           {/* Brand */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <div className="p-2 rounded-lg bg-[#0E3995]">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-lg font-heading font-bold text-white">
-                Neevachi Solutions
-              </span>
+              <img
+                src="/footer Logo.png"
+                alt="Neevachi Solutions"
+                className="h-12 w-auto"
+              />
             </div>
             <p className="text-blue-50 text-sm max-w-md mb-4">
-              Transforming ideas into technological reality. We specialize in Robotics, 
+              Transforming ideas into technological reality. We specialize in Robotics,
               Embedded Systems, IoT, PCB Design, and 3D Engineering solutions.
             </p>
+            <div className="text-blue-50 text-sm max-w-md mb-4">
+              <p className="font-semibold text-white mb-2">Address:</p>
+              <p>Flat No. S No 50, Survey Number :50, Office No 1 15/1, Samarth Sankul near Bank of Maharashtra, Pune Pune, MAHARASHTRA, 411041</p>
+            </div>
+            <div className="text-blue-50 text-sm max-w-md mb-4">
+              <p className="font-semibold text-white mb-2">Email:</p>
+              <p>info@neevachi.in</p>
+            </div>
+            <div className="text-blue-50 text-sm max-w-md mb-4">
+              <p className="font-semibold text-white mb-2">Contact:</p>
+              <p>+91 9922552891, +91 9403497065</p>
+            </div>
+            <div className="text-blue-50 text-sm max-w-md mb-4">
+              <p className="font-semibold text-white mb-2">GSTIN:</p>
+              <p>27GYTPM3198G1ZK</p>
+            </div>
             <div className="flex items-center gap-4">
               <a href="#" className="text-white hover:text-blue-200 transition-colors">
                 <Github className="w-5 h-5" />
@@ -86,7 +101,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-[#0E3995] flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="pt-4 border-t border-[#0E3995] flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-blue-100">
             © 2024 Neevachi Solutions. All rights reserved.
           </p>
