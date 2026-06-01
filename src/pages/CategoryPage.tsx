@@ -120,7 +120,7 @@ export default function CategoryPage() {
             <p className="text-gray-500">No products found in this category. Try adjusting your filters.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {sortedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -142,10 +142,10 @@ const ProductCard = ({ product }: { product: Product }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative">
-        <img 
-          src={product.image} 
+        <img
+          src={product.image}
           alt={product.name}
-          className="w-full h-48 object-cover"
+          className="w-full h-64 object-cover"
         />
         {product.isNew && (
           <span className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
@@ -169,7 +169,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           />
         </button>
       </div>
-      <div className="p-4">
+      <div className="p-6">
         <h3 className="font-medium text-gray-900 mb-1 line-clamp-1">{product.name}</h3>
         <div className="flex items-center mb-2">
           <div className="flex text-amber-400">

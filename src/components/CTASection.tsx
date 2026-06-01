@@ -55,10 +55,10 @@ export function CTASection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h2 className="text-4xl md:text-5xl font-heading font-bold text-white mb-4">
+          <h2 className="text-4xl font-heading font-bold text-white mb-4">
             Ready to Start Your Project?
           </h2>
-          <p className="text-gray-200 text-lg max-w-2xl mx-auto">
+          <p className="text-gray-200 text-base max-w-2xl mx-auto">
             Get instant quotations for PCB manufacturing and 3D printing services. Our team is ready to bring your ideas to life!
           </p>
         </motion.div>

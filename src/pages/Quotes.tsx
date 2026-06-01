@@ -286,12 +286,9 @@ export default function GetQuotes() {
                           className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <option value="" disabled>Select project type</option>
-                          <option value="web">Web Development</option>
-                          <option value="mobile">Mobile App Development</option>
-                          <option value="design">UI/UX Design</option>
-                          <option value="ecommerce">E-commerce Solution</option>
-                          <option value="cms">CMS Development</option>
-                          <option value="other">Other</option>
+                          <option value="project">Project Quotes</option>
+                          <option value="3d-printing">3D Printing</option>
+                          <option value="pcb">PCB Quotes</option>
                         </select>
                       </div>
                     </div>

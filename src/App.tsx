@@ -27,6 +27,8 @@ import Register from './pages/Register';
 import Services from './pages/Services';
 import Shop from './pages/Shop';
 import Workflow from './pages/Workflow';
+import AdminDashboard from './pages/AdminDashboard';
+import SliderUpdatesAdmin from './pages/SliderUpdatesAdmin';
 
 const queryClient = new QueryClient();
 
@@ -73,9 +75,14 @@ const App: React.FC = () => {
                   <Route path="/all-projects" element={<AllProjects />} />
                   
                   {/* Protected routes */}
-                  <Route path="/admin/*" element={
+                  <Route path="/admin" element={
                     <ProtectedRoute>
-                      <div>Admin Dashboard</div>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin/slider-updates" element={
+                    <ProtectedRoute>
+                      <SliderUpdatesAdmin />
                     </ProtectedRoute>
                   } />
                   

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 import { Product, products, categories } from '@/types/product';
 import { CustomProductModal } from '../components/CustomProductModal';
@@ -75,11 +76,30 @@ export default function Shop() {
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold mb-4">Shop With Us</h1>
-          <p className="text-xl mb-8">Discover amazing products at great prices</p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="text-4xl font-bold mb-4"
+          >
+            Shop With Us
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="text-xl mb-8"
+          >
+            Discover amazing products at great prices
+          </motion.p>
           
           {/* Search Bar */}
-          <div className="max-w-2xl mx-auto relative">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+            className="max-w-2xl mx-auto relative"
+          >
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -131,7 +151,7 @@ export default function Shop() {
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -141,8 +161,8 @@ export default function Shop() {
         {/* Category Cards Section */}
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6">Browse by Category</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-            {categories.map((category) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {categories.slice(0, 20).map((category) => (
               <Link
                 key={category.id}
                 to={`/shop/category/${category.id}`}

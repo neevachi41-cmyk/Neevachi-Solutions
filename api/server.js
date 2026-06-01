@@ -8,6 +8,7 @@ import fs from 'fs';
 import dbConnect from './lib/db.js';
 import authRoutes from './routes/auth.js';
 import contactRoutes from './routes/contact.js';
+import sliderUpdateRoutes from './routes/sliderUpdates.js';
 
 // Configure __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -28,6 +29,7 @@ dbConnect();
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/slider-updates', sliderUpdateRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -1,9 +1,6 @@
 import { Outlet } from 'react-router-dom';
-import { motion } from 'framer-motion';
-
 import { Footer } from './Footer';
 import { Header } from './Header';
-import LatestUpdatesSlider from './LatestUpdatesSlider';
 
 export function Layout() {
   return (
@@ -13,13 +10,8 @@ export function Layout() {
         <Header />
       </header>
       
-      {/* Latest Updates Slider - Below Navbar */}
-      <div className="pt-20">
-        <LatestUpdatesSlider />
-      </div>
-      
       {/* Main Content */}
-      <div className="flex-grow">
+      <div className="flex-grow pt-20">
         <main>
           <Outlet />
         </main>

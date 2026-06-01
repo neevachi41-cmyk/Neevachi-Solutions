@@ -1,118 +1,201 @@
-import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trophy, Users, Building, Settings, Award } from 'lucide-react';
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Trophy,
+  Users,
+  Building,
+  Settings,
+  Award
+};
 
 const LatestUpdatesSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
 
   const updates = [
     {
-      image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop",
-      title: "New Robotics Project",
-      description: "Advanced automation system launched"
+      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80",
+      title: "Transforming Ideas into Technological Reality",
+      teamName: "Neevachi Solutions",
+      position: "Our Mission",
+      schoolName: "Neevachi Solutions",
+      category: "Company Vision",
+      icon: Building
     },
     {
-      image: "https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?w=800&h=400&fit=crop",
-      title: "IoT Integration",
-      description: "Smart home solutions now available"
+      image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&auto=format&fit=crop&q=80",
+      title: "IRC League 2025",
+      teamName: "The Strangers",
+      position: "First Runner Up",
+      schoolName: "Neevachi Solutions",
+      category: "Middle Level",
+      icon: Trophy
     },
     {
-      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=400&fit=crop",
-      title: "PCB Design Update",
-      description: "New circuit design tools released"
+      image: "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=800&auto=format&fit=crop&q=80",
+      title: "National Robotics Championship",
+      teamName: "Tech Innovators",
+      position: "Winner",
+      schoolName: "Neevachi Solutions",
+      category: "Senior Level",
+      icon: Users
     },
     {
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&h=400&fit=crop",
-      title: "3D Printing Service",
-      description: "Rapid prototyping now faster"
+      image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80",
+      title: "Innovation Summit 2024",
+      teamName: "Future Builders",
+      position: "Best Innovation",
+      schoolName: "Neevachi Solutions",
+      category: "Junior Level",
+      icon: Building
+    },
+    {
+      image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&auto=format&fit=crop&q=80",
+      title: "World Robotics Olympiad",
+      teamName: "Robo Masters",
+      position: "Gold Medal",
+      schoolName: "Neevachi Solutions",
+      category: "Advanced Level",
+      icon: Award
+    },
+    {
+      image: "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?w=800&auto=format&fit=crop&q=80",
+      title: "Tech Challenge 2024",
+      teamName: "Code Warriors",
+      position: "Second Place",
+      schoolName: "Neevachi Solutions",
+      category: "Senior Level",
+      icon: Settings
+    },
+    {
+      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80",
+      title: "STEM Excellence Award",
+      teamName: "Science Squad",
+      position: "Outstanding Achievement",
+      schoolName: "Neevachi Solutions",
+      category: "Elementary Level",
+      icon: Trophy
     }
   ];
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % updates.length);
-    }, 4000);
+    }, 5000);
     return () => clearInterval(timer);
   }, [updates.length]);
 
   const nextSlide = () => {
+    setDirection(1);
     setCurrentIndex((prev) => (prev + 1) % updates.length);
   };
 
   const prevSlide = () => {
+    setDirection(-1);
     setCurrentIndex((prev) => (prev - 1 + updates.length) % updates.length);
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="w-full bg-white border-b border-gray-200 shadow-sm"
-    >
-      <div className="container mx-auto max-w-7xl px-4 py-6">
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-lg border border-blue-100 overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-          </div>
+    <div className="w-full bg-gradient-to-br from-[#0E3995] to-[#0E3995]">
+      <div className="container mx-auto max-w-7xl px-4 py-12">
+        {/* Carousel */}
+        <div className="relative flex items-center justify-center gap-4">
+          {/* Navigation Arrows */}
+          <button
+            onClick={prevSlide}
+            className="flex-shrink-0 p-4 rounded-full bg-white/30 backdrop-blur-md hover:bg-white/40 transition-all duration-300 group shadow-lg"
+          >
+            <ChevronLeft className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
+          </button>
 
-          {/* Image Slider */}
-          <div className="relative h-64">
-            {updates.map((update, index) => (
+          <div className="flex-1 max-w-6xl">
+            <AnimatePresence mode="wait" initial={false}>
               <motion.div
-                key={index}
-                initial={false}
-                animate={{
-                  opacity: index === currentIndex ? 1 : 0,
-                  x: index === currentIndex ? 0 : index < currentIndex ? -50 : 50
-                }}
-                transition={{ duration: 0.5 }}
-                className="absolute inset-0"
+                key={currentIndex}
+                initial={{ opacity: 0, x: direction > 0 ? 100 : -100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: direction > 0 ? -100 : 100 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+                className="bg-white rounded-3xl shadow-2xl overflow-hidden"
+                style={{ height: '450px' }}
               >
-                <img
-                  src={update.image}
-                  alt={update.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h4 className="text-white font-bold text-2xl mb-2">{update.title}</h4>
-                  <p className="text-gray-200 text-base">{update.description}</p>
+                <div className="flex flex-col md:flex-row h-full">
+                  {/* Image Section */}
+                  <div className="md:w-1/2 h-full">
+                    <img
+                      src={updates[currentIndex].image}
+                      alt={updates[currentIndex].title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center h-full overflow-y-auto">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="p-3 rounded-full bg-blue-100">
+                        {(() => {
+                          const IconComponent = updates[currentIndex].icon || Trophy;
+                          return <IconComponent className="w-6 h-6 text-[#0E3995]" />;
+                        })()}
+                      </div>
+                      <span className="text-sm font-semibold text-[#0E3995] uppercase tracking-wider">
+                        Achievement
+                      </span>
+                    </div>
+
+                    <h3 className="text-2xl md:text-3xl font-heading font-bold text-gray-900 mb-6">
+                      {updates[currentIndex].title}
+                    </h3>
+
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <span className="text-sm font-medium text-gray-500 w-32">Team Name:</span>
+                        <span className="text-base font-semibold text-gray-900">{updates[currentIndex].teamName}</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="text-sm font-medium text-gray-500 w-32">Position:</span>
+                        <span className="text-base font-semibold text-[#0E3995]">{updates[currentIndex].position}</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="text-sm font-medium text-gray-500 w-32">School Name:</span>
+                        <span className="text-base font-semibold text-gray-900">{updates[currentIndex].schoolName}</span>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <span className="text-sm font-medium text-gray-500 w-32">Category:</span>
+                        <span className="text-base font-semibold text-gray-900">{updates[currentIndex].category}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
-            ))}
-
-            {/* Navigation Arrows */}
-            <button
-              onClick={prevSlide}
-              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all hover:scale-110"
-            >
-              <ChevronLeft className="w-6 h-6 text-gray-700" />
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all hover:scale-110"
-            >
-              <ChevronRight className="w-6 h-6 text-gray-700" />
-            </button>
+            </AnimatePresence>
           </div>
 
-          {/* Dots Indicator */}
-          <div className="flex justify-center gap-2 py-4 bg-white">
-            {updates.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`h-2 rounded-full transition-all ${
-                  index === currentIndex ? 'bg-blue-600 w-8' : 'bg-gray-300 hover:bg-gray-400 w-2'
-                }`}
-              />
-            ))}
-          </div>
+          <button
+            onClick={nextSlide}
+            className="flex-shrink-0 p-4 rounded-full bg-white/30 backdrop-blur-md hover:bg-white/40 transition-all duration-300 group shadow-lg"
+          >
+            <ChevronRight className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
+          </button>
+        </div>
+
+        {/* Slide Indicators */}
+        <div className="flex justify-center gap-2 mt-6">
+          {updates.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === currentIndex ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/70'
+              }`}
+            />
+          ))}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

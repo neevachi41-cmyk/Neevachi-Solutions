@@ -162,8 +162,18 @@ const About = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="container mx-auto max-w-7xl">
+      <section className="relative py-20 px-4 overflow-hidden">
+        {/* Background with fixed scrolling effect */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1567521464027-f127ff144326?q=80&w=1920&auto=format&fit=crop')",
+          }}
+        />
+        <div className="absolute inset-0 bg-black/60" />
+
+        {/* Static Content */}
+        <div className="relative z-10 container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -171,7 +181,7 @@ const About = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Our Achievements</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Our Achievements</h2>
             <p className="text-blue-100 text-lg max-w-3xl mx-auto">
               Numbers that speak for our commitment and excellence
             </p>
@@ -185,10 +195,16 @@ const About = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className="text-center p-8 bg-white/10 backdrop-blur-md rounded-xl border border-white/20"
+                className="relative group text-center p-8 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-white/30 hover:bg-black/50 transition-all duration-500 shadow-lg hover:shadow-2xl hover:shadow-blue-500/20"
               >
-                <div className="text-4xl md:text-5xl font-bold mb-2">{stat.value}</div>
-                <div className="text-blue-100">{stat.label}</div>
+                <div className="text-4xl md:text-5xl font-heading font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                  {stat.value}
+                </div>
+                <div className="text-gray-300 text-sm font-medium group-hover:text-white transition-colors">
+                  {stat.label}
+                </div>
+                {/* Glow effect on hover */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               </motion.div>
             ))}
           </div>

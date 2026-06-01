@@ -61,17 +61,6 @@ export function HeroSection() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="text-center"
         >
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm shadow-sm mb-8 border border-gray-200"
-          >
-            <span className="w-2 h-2 rounded-full bg-gray-600 animate-pulse" />
-            <span className="text-sm text-gray-700">Innovation Hub Since 2022</span>
-          </motion.div>
-
           {/* Main heading */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -79,9 +68,9 @@ export function HeroSection() {
             transition={{ delay: 0.3, duration: 0.8 }}
             className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold mb-6 leading-tight text-gray-900"
           >
-            Transforming Ideas into
+            Innovation in
             <br />
-            <span className="text-blue-600">Technological Reality</span>
+            <span className="text-blue-600">Technology</span>
           </motion.h1>
 
           {/* Subtitle */}

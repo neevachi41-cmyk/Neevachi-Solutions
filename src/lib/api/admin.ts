@@ -113,4 +113,32 @@ export const blogAPI = {
   },
 };
 
+// Slider Updates API
+export const sliderUpdatesAPI = {
+  getSliderUpdates: async (params = {}) => {
+    const response = await api.get('/slider-updates/admin/all', { params });
+    return response.data;
+  },
+  getSliderUpdate: async (id: string) => {
+    const response = await api.get(`/slider-updates/${id}`);
+    return response.data;
+  },
+  createSliderUpdate: async (data: any) => {
+    const response = await api.post('/slider-updates', data);
+    return response.data;
+  },
+  updateSliderUpdate: async (id: string, data: any) => {
+    const response = await api.put(`/slider-updates/${id}`, data);
+    return response.data;
+  },
+  deleteSliderUpdate: async (id: string) => {
+    const response = await api.delete(`/slider-updates/${id}`);
+    return response.data;
+  },
+  toggleSliderUpdate: async (id: string) => {
+    const response = await api.patch(`/slider-updates/${id}/toggle`);
+    return response.data;
+  },
+};
+
 export default api;

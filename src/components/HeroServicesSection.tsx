@@ -2,6 +2,25 @@ import { motion } from 'framer-motion';
 
 import { Cpu, Truck, Wrench, Box } from 'lucide-react';
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" as const },
+  },
+};
+
 const services = [
   { icon: Cpu, text: "Robotics Parts", description: "High-quality components" },
   { icon: Truck, text: "Supply Chain Management", description: "Efficient logistics" },
@@ -14,19 +33,16 @@ export function HeroServicesSection() {
     <section className="py-12 px-4 bg-white">
       <div className="container mx-auto max-w-6xl">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
         >
           {services.map((service, index) => (
             <motion.div
               key={service.text}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
+              variants={itemVariants}
               className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-gray-300 group"
             >
               <div className="flex flex-col items-center text-center">

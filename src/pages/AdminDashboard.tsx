@@ -7,9 +7,14 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <Button asChild>
-          <Link to="/admin/services/new">Add New Service</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/admin/slider-updates">Manage Slider Updates</Link>
+          </Button>
+          <Button asChild>
+            <Link to="/admin/services/new">Add New Service</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
