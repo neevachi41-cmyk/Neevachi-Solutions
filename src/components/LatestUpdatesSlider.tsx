@@ -113,12 +113,12 @@ const LatestUpdatesSlider = () => {
           </button>
 
           <div className="flex-1 max-w-6xl">
-            <AnimatePresence mode="wait" initial={false}>
+            <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
-                initial={{ opacity: 0, x: direction > 0 ? 100 : -100 }}
+                initial={{ opacity: 0, x: 100 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: direction > 0 ? -100 : 100 }}
+                exit={{ opacity: 0, x: -100 }}
                 transition={{ duration: 0.5, ease: "easeInOut" }}
                 className="bg-white rounded-3xl shadow-2xl overflow-hidden"
                 style={{ height: '450px' }}

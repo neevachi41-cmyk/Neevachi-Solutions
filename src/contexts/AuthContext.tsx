@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     try {
       const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
@@ -52,31 +52,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('token', data.token);
       localStorage.setItem('userData', JSON.stringify(data.user));
       setUser(data.user);
-      
+
       navigate('/admin/dashboard');
       toast.success('Login successful');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Login failed');
       throw error;
     }
-  };
+  }, [navigate]);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
     setUser(null);
     navigate('/login');
     toast.success('Logged out successfully');
-  };
+  }, [navigate]);
 
   return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        isAuthenticated: !!user, 
-        login, 
-        logout, 
-        loading 
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        login,
+        logout,
+        loading
       }}
     >
       {children}

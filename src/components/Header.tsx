@@ -132,12 +132,11 @@ export function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Zap className="w-5 h-5 text-blue-600" />
-            </div>
-            <span className="text-xl font-heading font-bold text-gray-700">
-              Neevachi Solutions
-            </span>
+            <img
+              src="/navbar logo.png"
+              alt="Neevachi Solutions"
+              className="w-32 h-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Navigation */}
