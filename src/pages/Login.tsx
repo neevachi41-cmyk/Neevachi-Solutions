@@ -34,18 +34,28 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
-      <motion.div 
+    <div className="min-h-screen relative flex items-center justify-center p-4">
+      {/* Background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920&auto=format&fit=crop')",
+        }}
+      />
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/60" />
+
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden border border-white/20">
           {/* Decorative Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-center">
-            <h1 className="text-2xl font-bold text-white">Welcome Back</h1>
-            <p className="text-blue-100 mt-1">Sign in to continue to your account</p>
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center">
+            <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
+            <p className="text-blue-100 mt-2">Sign in to continue to your account</p>
           </div>
 
           <div className="p-8">

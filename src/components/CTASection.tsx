@@ -36,7 +36,7 @@ export function CTASection() {
   };
 
   return (
-    <section className="py-12 px-4 relative overflow-hidden text-gray-800">
+    <section className="py-20 px-4 relative overflow-hidden">
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed"

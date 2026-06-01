@@ -11,7 +11,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <main>
         <LatestUpdatesSlider />
-        <ServicesSection />
+        <ServicesSection clickable={false} />
         <WhyChooseUsSection />
         <TrustSection />
         <ProjectsSection />

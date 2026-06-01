@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 
 import { Bot, Box, CircuitBoard, Cpu, Layers, Wifi, X, ArrowRight, FileText } from 'lucide-react';
@@ -67,11 +67,12 @@ const itemVariants = {
   },
 };
 
-export function ServicesSection() {
+export function ServicesSection({ clickable = true }: { clickable?: boolean }) {
   const [selectedService, setSelectedService] = useState<typeof services[0] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleServiceClick = (service: typeof services[0]) => {
+    if (!clickable) return;
     setSelectedService(service);
     setIsModalOpen(true);
   };
@@ -125,8 +126,8 @@ export function ServicesSection() {
             <motion.div
               key={service.title}
               variants={itemVariants}
-              onClick={() => handleServiceClick(service)}
-              className="group relative bg-gradient-card rounded-xl p-6 border border-border hover:border-primary/30 transition-all duration-500 hover:shadow-card-hover cursor-pointer"
+              onClick={clickable ? () => handleServiceClick(service) : undefined}
+              className={`group relative bg-gradient-card rounded-xl p-6 border border-border ${clickable ? 'hover:border-primary/30 hover:shadow-card-hover cursor-pointer' : ''} transition-all duration-500`}
             >
               <div className="flex items-start gap-4">
                 <div className="p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
@@ -143,11 +144,11 @@ export function ServicesSection() {
                     {service.features.map((feature) => (
                       <li
                         key={feature}
-                        onClick={(e) => {
+                        onClick={clickable ? (e) => {
                           e.stopPropagation();
                           window.location.href = '/quotes';
-                        }}
-                        className="text-sm text-muted-foreground flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
+                        } : undefined}
+                        className={`text-sm text-muted-foreground flex items-center gap-2 ${clickable ? 'cursor-pointer hover:text-primary' : ''} transition-colors`}
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                         {feature}
@@ -165,14 +166,15 @@ export function ServicesSection() {
       </div>
 
       {/* Modal */}
-      {isModalOpen && selectedService && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-          >
+      <AnimatePresence>
+        {isModalOpen && selectedService && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            >
             <div className="p-6 md:p-8">
               {/* Header */}
               <div className="flex items-start justify-between mb-6">
@@ -244,7 +246,8 @@ export function ServicesSection() {
             </div>
           </motion.div>
         </div>
-      )}
+        )}
+      </AnimatePresence>
     </section>
   );
 }

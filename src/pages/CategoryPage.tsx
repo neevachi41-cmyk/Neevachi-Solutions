@@ -169,7 +169,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           />
         </button>
       </div>
-      <div className="p-6">
+      <div className="p-4">
         <h3 className="font-medium text-gray-900 mb-1 line-clamp-1">{product.name}</h3>
         <div className="flex items-center mb-2">
           <div className="flex text-amber-400">

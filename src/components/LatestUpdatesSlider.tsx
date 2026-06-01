@@ -83,6 +83,7 @@ const LatestUpdatesSlider = () => {
 
   useEffect(() => {
     const timer = setInterval(() => {
+      setDirection(1);
       setCurrentIndex((prev) => (prev + 1) % updates.length);
     }, 5000);
     return () => clearInterval(timer);

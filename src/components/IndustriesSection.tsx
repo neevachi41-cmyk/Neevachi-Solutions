@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { HeartPulse, BookOpen, Wallet, ShoppingCart, Factory, Home, Plane, Rocket } from "lucide-react";
+import { CircuitBoard, Wifi, Box, Cpu, Layers, Factory } from "lucide-react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -22,52 +22,40 @@ const itemVariants = {
 
 const industries = [
   {
-    icon: <HeartPulse className="w-8 h-8 text-blue-600" />,
-    title: "Healthcare",
-    description: "Innovative technology solutions for healthcare providers and medical institutions.",
-    solutions: ["Telemedicine", "EHR Systems", "Patient Portals", "Healthcare Analytics"]
+    icon: <CircuitBoard className="w-8 h-8 text-blue-600" />,
+    title: "PCB Design",
+    description: "Professional PCB and circuit design services for electronic products.",
+    solutions: ["Schematic Design", "PCB Layout", "Multi-layer Boards", "Prototyping"]
   },
   {
-    icon: <BookOpen className="w-8 h-8 text-blue-600" />,
-    title: "Education",
-    description: "Digital transformation for educational institutions and e-learning platforms.",
-    solutions: ["LMS Integration", "E-learning Apps", "Student Portals", "Virtual Classrooms"]
+    icon: <Wifi className="w-8 h-8 text-blue-600" />,
+    title: "IoT Solutions",
+    description: "Internet of Things for smart connectivity and automation.",
+    solutions: ["Sensor Networks", "Cloud Integration", "Edge Computing", "Data Analytics"]
   },
   {
-    icon: <Wallet className="w-8 h-8 text-blue-600" />,
-    title: "Finance",
-    description: "Secure and scalable financial technology solutions for modern banking.",
-    solutions: ["Mobile Banking", "Payment Gateways", "Wealth Management", "Blockchain"]
+    icon: <Box className="w-8 h-8 text-blue-600" />,
+    title: "3D Printing",
+    description: "Rapid prototyping with advanced 3D printing technologies.",
+    solutions: ["FDM Printing", "SLA Printing", "Multi-material", "Production Parts"]
   },
   {
-    icon: <ShoppingCart className="w-8 h-8 text-blue-600" />,
-    title: "E-commerce",
-    description: "Custom e-commerce solutions to grow your online business.",
-    solutions: ["Online Stores", "Marketplace", "Inventory Management", "Payment Integration"]
+    icon: <Cpu className="w-8 h-8 text-blue-600" />,
+    title: "Embedded Systems",
+    description: "Advanced embedded system design and development.",
+    solutions: ["MCU Programming", "RTOS Development", "Hardware Integration", "Firmware"]
+  },
+  {
+    icon: <Layers className="w-8 h-8 text-blue-600" />,
+    title: "3D Engineering",
+    description: "CAD modeling and 3D engineering solutions.",
+    solutions: ["CAD Design", "FEA Analysis", "Product Design", "Engineering"]
   },
   {
     icon: <Factory className="w-8 h-8 text-blue-600" />,
     title: "Manufacturing",
-    description: "Industry 4.0 solutions for smart manufacturing and supply chain.",
-    solutions: ["IoT Integration", "Inventory Tracking", "Quality Control", "Supply Chain"]
-  },
-  {
-    icon: <Home className="w-8 h-8 text-blue-600" />,
-    title: "Real Estate",
-    description: "Digital solutions for property management and real estate businesses.",
-    solutions: ["Property Portals", "Virtual Tours", "CRM Systems", "Lease Management"]
-  },
-  {
-    icon: <Plane className="w-8 h-8 text-blue-600" />,
-    title: "Travel & Hospitality",
-    description: "Technology solutions for travel agencies and hospitality businesses.",
-    solutions: ["Booking Systems", "Travel Portals", "Hotel Management", "CRM Solutions"]
-  },
-  {
-    icon: <Rocket className="w-8 h-8 text-blue-600" />,
-    title: "Startups",
-    description: "Scalable technology solutions for fast-growing startups.",
-    solutions: ["MVP Development", "Web & Mobile Apps", "Cloud Solutions", "UI/UX Design"]
+    description: "Industry 4.0 solutions for smart manufacturing.",
+    solutions: ["Automation", "Quality Control", "Process Optimization", "Smart Factory"]
   }
 ];
 

@@ -127,7 +127,7 @@ export function ProjectsSection() {
             Our Project Approach
           </h3>
           <p className="text-muted-foreground text-lg max-w-3xl mx-auto mb-8">
-            We follow a systematic approach to ensure every project is delivered on time and exceeds expectations. From concept to deployment, we work closely with our clients to bring their vision to reality.
+            We follow a systematic approach to ensure every project is delivered on time and exceeds expectations. From concept to deployment, we work closely with our clients to bring their vision to reality. Our proven methodology combines industry best practices with agile principles to deliver exceptional results consistently.
           </p>
         <motion.div
           variants={containerVariants}
@@ -138,19 +138,19 @@ export function ProjectsSection() {
         >
           <motion.div variants={itemVariants} className="p-6 bg-gradient-card rounded-xl border border-border text-center">
             <h4 className="text-xl font-heading font-semibold text-foreground mb-2">Planning</h4>
-            <p className="text-muted-foreground">Detailed project planning and requirement analysis.</p>
+            <p className="text-muted-foreground">Detailed project planning and requirement analysis to establish clear objectives, timelines, and deliverables for successful project execution.</p>
           </motion.div>
           <motion.div variants={itemVariants} className="p-6 bg-gradient-card rounded-xl border border-border text-center">
             <h4 className="text-xl font-heading font-semibold text-foreground mb-2">Design</h4>
-            <p className="text-muted-foreground">Innovative design and prototyping phase.</p>
+            <p className="text-muted-foreground">Innovative design and prototyping phase with iterative feedback loops to ensure the solution meets all user requirements and business goals.</p>
           </motion.div>
           <motion.div variants={itemVariants} className="p-6 bg-gradient-card rounded-xl border border-border text-center">
             <h4 className="text-xl font-heading font-semibold text-foreground mb-2">Development</h4>
-            <p className="text-muted-foreground">Agile development with regular updates.</p>
+            <p className="text-muted-foreground">Agile development with regular updates, code reviews, and continuous integration to deliver high-quality, maintainable, and scalable software solutions.</p>
           </motion.div>
           <motion.div variants={itemVariants} className="p-6 bg-gradient-card rounded-xl border border-border text-center">
             <h4 className="text-xl font-heading font-semibold text-foreground mb-2">Testing</h4>
-            <p className="text-muted-foreground">Comprehensive testing and quality assurance.</p>
+            <p className="text-muted-foreground">Comprehensive testing and quality assurance including unit testing, integration testing, and user acceptance testing to ensure bug-free deployment.</p>
           </motion.div>
         </motion.div>
         </motion.div>
