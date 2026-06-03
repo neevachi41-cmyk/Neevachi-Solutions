@@ -14,6 +14,9 @@ import { toast } from 'sonner';
 import * as THREE from 'three';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 // Material options with pricing per gram
@@ -92,6 +95,7 @@ const PrintingService = () => {
   const [dragActive, setDragActive] = useState(false);
   const [fileUnit, setFileUnit] = useState<'mm' | 'inch'>('mm');
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   
   // Step wizard state
   const [currentStep, setCurrentStep] = useState(0);
@@ -103,96 +107,185 @@ const PrintingService = () => {
   // Parse 3D file and calculate volume and dimensions
   const parse3DFile = async (file: File): Promise<{ volume: number; dimensions: { x: number; y: number; z: number }; geometry: THREE.BufferGeometry }> => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
-          
-          let geometry: THREE.BufferGeometry;
-          
-          if (fileExtension === '.stl') {
+      const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+      
+      let geometry: THREE.BufferGeometry;
+      
+      if (fileExtension === '.stl') {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
             const contents = e.target?.result as ArrayBuffer;
             const loader = new STLLoader();
             geometry = loader.parse(contents);
-          } else if (fileExtension === '.obj') {
+            
+            // Calculate volume and dimensions
+            const result = calculateVolumeAndDimensions(geometry);
+            resolve(result);
+          } catch (error) {
+            console.error('Error parsing STL file:', error);
+            reject(error);
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsArrayBuffer(file);
+      } else if (fileExtension === '.obj') {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
             const contents = e.target?.result as string;
             const loader = new OBJLoader();
             const object = loader.parse(contents);
-            geometry = new THREE.BufferGeometry();
             
-            // Merge all geometries from OBJ
-            const geometries: THREE.BufferGeometry[] = [];
+            // Get first geometry from OBJ
+            let foundGeometry: THREE.BufferGeometry | null = null;
             object.traverse((child) => {
-              if (child instanceof THREE.Mesh) {
-                geometries.push(child.geometry);
+              if (child instanceof THREE.Mesh && !foundGeometry) {
+                foundGeometry = child.geometry;
               }
             });
             
-            if (geometries.length > 0) {
-              if (geometries.length === 1) {
-                geometry = geometries[0];
-              } else {
-                // Merge geometries
-                const mergedGeometry = THREE.BufferGeometryUtils?.mergeGeometries?.(geometries);
-                if (mergedGeometry) {
-                  geometry = mergedGeometry;
-                } else {
-                  // Fallback: use first geometry
-                  geometry = geometries[0];
-                }
-              }
+            if (foundGeometry) {
+              geometry = foundGeometry;
+              const result = calculateVolumeAndDimensions(geometry);
+              resolve(result);
+            } else {
+              reject(new Error('No geometry found in OBJ file'));
             }
-          } else {
-            reject(new Error('Unsupported file format'));
-            return;
+          } catch (error) {
+            console.error('Error parsing OBJ file:', error);
+            reject(error);
           }
-
-          // Calculate volume using signed tetrahedron method (more accurate)
-          const positions = geometry.attributes.position.array as Float32Array;
-          const triangles = positions.length / 9;
-          let volume = 0;
-          
-          for (let i = 0; i < triangles; i++) {
-            const p1 = new THREE.Vector3(positions[i * 9], positions[i * 9 + 1], positions[i * 9 + 2]);
-            const p2 = new THREE.Vector3(positions[i * 9 + 3], positions[i * 9 + 4], positions[i * 9 + 5]);
-            const p3 = new THREE.Vector3(positions[i * 9 + 6], positions[i * 9 + 7], positions[i * 9 + 8]);
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsText(file);
+      } else if (fileExtension === '.gltf' || fileExtension === '.glb') {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const loader = new GLTFLoader();
+            const url = URL.createObjectURL(file);
             
-            volume += p1.dot(p2.cross(p3)) / 6;
+            loader.load(url, (gltf) => {
+              let foundGeometry: THREE.BufferGeometry | null = null;
+              gltf.scene.traverse((child) => {
+                if (child instanceof THREE.Mesh && !foundGeometry) {
+                  foundGeometry = child.geometry;
+                }
+              });
+              
+              URL.revokeObjectURL(url);
+              
+              if (foundGeometry) {
+                geometry = foundGeometry;
+                const result = calculateVolumeAndDimensions(geometry);
+                resolve(result);
+              } else {
+                reject(new Error('No geometry found in GLTF file'));
+              }
+            }, undefined, (error) => {
+              URL.revokeObjectURL(url);
+              reject(error);
+            });
+          } catch (error) {
+            console.error('Error parsing GLTF file:', error);
+            reject(error);
           }
-          
-          volume = Math.abs(volume);
-          
-          // Convert from mm³ to cm³
-          const volumeInCm3 = volume / 1000;
-          
-          // Calculate bounding box dimensions
-          geometry.computeBoundingBox();
-          const boundingBox = geometry.boundingBox;
-          const size = new THREE.Vector3();
-          boundingBox.getSize(size);
-          
-          // Convert from mm to cm
-          const dimensions = {
-            x: size.x / 10,
-            y: size.y / 10,
-            z: size.z / 10,
-          };
-          
-          resolve({ volume: volumeInCm3, dimensions, geometry });
-        } catch (error) {
-          console.error('Error parsing 3D file:', error);
-          reject(error);
-        }
-      };
-      
-      reader.onerror = () => reject(new Error('Failed to read file'));
-      
-      if (file.name.toLowerCase().endsWith('.stl')) {
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsArrayBuffer(file);
+      } else if (fileExtension === '.fbx') {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const loader = new FBXLoader();
+            const url = URL.createObjectURL(file);
+            
+            loader.load(url, (fbx) => {
+              let foundGeometry: THREE.BufferGeometry | null = null;
+              fbx.traverse((child) => {
+                if (child instanceof THREE.Mesh && !foundGeometry) {
+                  foundGeometry = child.geometry;
+                }
+              });
+              
+              URL.revokeObjectURL(url);
+              
+              if (foundGeometry) {
+                geometry = foundGeometry;
+                const result = calculateVolumeAndDimensions(geometry);
+                resolve(result);
+              } else {
+                reject(new Error('No geometry found in FBX file'));
+              }
+            }, undefined, (error) => {
+              URL.revokeObjectURL(url);
+              reject(error);
+            });
+          } catch (error) {
+            console.error('Error parsing FBX file:', error);
+            reject(error);
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsArrayBuffer(file);
+      } else if (fileExtension === '.ply') {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const contents = e.target?.result as ArrayBuffer;
+            const loader = new PLYLoader();
+            geometry = loader.parse(contents);
+            
+            const result = calculateVolumeAndDimensions(geometry);
+            resolve(result);
+          } catch (error) {
+            console.error('Error parsing PLY file:', error);
+            reject(error);
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
         reader.readAsArrayBuffer(file);
       } else {
-        reader.readAsText(file);
+        reject(new Error('Unsupported file format'));
       }
     });
+  };
+
+  // Helper function to calculate volume and dimensions from geometry
+  const calculateVolumeAndDimensions = (geometry: THREE.BufferGeometry): { volume: number; dimensions: { x: number; y: number; z: number }; geometry: THREE.BufferGeometry } => {
+    // Calculate volume using signed tetrahedron method (more accurate)
+    const positions = geometry.attributes.position.array as Float32Array;
+    const triangles = positions.length / 9;
+    let volume = 0;
+    
+    for (let i = 0; i < triangles; i++) {
+      const p1 = new THREE.Vector3(positions[i * 9], positions[i * 9 + 1], positions[i * 9 + 2]);
+      const p2 = new THREE.Vector3(positions[i * 9 + 3], positions[i * 9 + 4], positions[i * 9 + 5]);
+      const p3 = new THREE.Vector3(positions[i * 9 + 6], positions[i * 9 + 7], positions[i * 9 + 8]);
+      
+      volume += p1.dot(p2.cross(p3)) / 6;
+    }
+    
+    volume = Math.abs(volume);
+    
+    // Convert from mm³ to cm³
+    const volumeInCm3 = volume / 1000;
+    
+    // Calculate bounding box dimensions
+    geometry.computeBoundingBox();
+    const boundingBox = geometry.boundingBox;
+    const size = new THREE.Vector3();
+    boundingBox.getSize(size);
+    
+    // Convert from mm to cm
+    const dimensions = {
+      x: size.x / 10,
+      y: size.y / 10,
+      z: size.z / 10,
+    };
+    
+    return { volume: volumeInCm3, dimensions, geometry };
   };
 
   // Estimate print time based on volume and settings (more accurate)
@@ -289,12 +382,12 @@ const PrintingService = () => {
     const fileArray = Array.from(files);
     
     for (const file of fileArray) {
-      // Only accept STL and OBJ files
-      const validExtensions = ['.stl', '.obj'];
+      // Accept multiple 3D file formats
+      const validExtensions = ['.stl', '.obj', '.gltf', '.glb', '.fbx', '.ply'];
       const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
       
       if (!validExtensions.includes(fileExtension)) {
-        toast.error(`Invalid file type: ${file.name}. Only STL and OBJ files are allowed.`);
+        toast.error(`Invalid file type: ${file.name}. Only STL, OBJ, GLTF, GLB, FBX, and PLY files are allowed.`);
         continue;
       }
 
@@ -344,6 +437,14 @@ const PrintingService = () => {
     if (newFiles.length > 0) {
       console.log('Adding files to state:', newFiles.map(f => ({ name: f.name, hasGeometry: !!f.geometry })));
       setUploadedFiles(prev => [...prev, ...newFiles]);
+      
+      // Send the first file to the iframe viewer
+      if (newFiles.length > 0) {
+        setTimeout(() => {
+          sendFileToIframe(fileArray[0]);
+        }, 100);
+      }
+      
       toast.success(`${newFiles.length} file(s) uploaded successfully`);
     }
   }, [selectedMaterial, parse3DFile, estimatePrintTime, settings.printer, settings.infill, settings.supports]);
@@ -382,6 +483,26 @@ const PrintingService = () => {
 
   const removeFile = (id: string) => {
     setUploadedFiles(prev => prev.filter(f => f.id !== id));
+  };
+
+  // Send file to iframe viewer
+  const sendFileToIframe = (file: File) => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      // Create object URL for the file
+      const fileUrl = URL.createObjectURL(file);
+      
+      // Send message to iframe with file info
+      iframeRef.current.contentWindow.postMessage({
+        type: 'loadModel',
+        fileUrl: fileUrl,
+        fileName: file.name
+      }, '*');
+      
+      // Revoke URL after a delay to allow loading
+      setTimeout(() => {
+        URL.revokeObjectURL(fileUrl);
+      }, 10000);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -441,190 +562,10 @@ const PrintingService = () => {
     setCurrentStep(sections.indexOf(section));
   };
 
-  // 3D Viewer Component
-  const ModelViewer = ({ geometry }: { geometry: THREE.BufferGeometry }) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [isError, setIsError] = useState(false);
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [debugInfo, setDebugInfo] = useState('');
-
-    useEffect(() => {
-      const container = containerRef.current;
-      
-      console.log('ModelViewer: useEffect called');
-      console.log('ModelViewer: Container exists:', !!container);
-      console.log('ModelViewer: Geometry exists:', !!geometry);
-      
-      if (!container || !geometry) {
-        setDebugInfo('No container or geometry');
-        setIsError(true);
-        return;
-      }
-
-      // Check if geometry has valid data
-      if (!geometry.attributes.position) {
-        setDebugInfo('Geometry has no position attribute');
-        console.error('ModelViewer: Geometry has no position attribute');
-        setIsError(true);
-        return;
-      }
-
-      const vertexCount = geometry.attributes.position.count;
-      console.log('ModelViewer: Geometry vertex count:', vertexCount);
-      setDebugInfo(`Vertices: ${vertexCount}`);
-      
-      if (vertexCount === 0) {
-        setDebugInfo('Geometry has no vertices');
-        console.error('ModelViewer: Geometry has no vertices');
-        setIsError(true);
-        return;
-      }
-
-      let renderer: THREE.WebGLRenderer | null = null;
-      let animationFrameId: number | null = null;
-      let controls: OrbitControls | null = null;
-
-      const initViewer = () => {
-        try {
-          // Check container dimensions
-          const width = container.clientWidth;
-          const height = container.clientHeight;
-          console.log('ModelViewer: Container dimensions:', width, 'x', height);
-          setDebugInfo(`Container: ${width}x${height}`);
-
-          if (width === 0 || height === 0) {
-            console.warn('ModelViewer: Container has no dimensions, retrying...');
-            setTimeout(initViewer, 100);
-            return;
-          }
-
-          // Clone geometry
-          const clonedGeometry = geometry.clone();
-          
-          // Setup scene
-          const scene = new THREE.Scene();
-          scene.background = new THREE.Color(0x0f172a);
-
-          // Setup camera
-          const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-          camera.position.set(8, 6, 8);
-          camera.lookAt(0, 0, 0);
-
-          // Setup renderer
-          renderer = new THREE.WebGLRenderer({ antialias: true });
-          renderer.setSize(width, height);
-          renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-          container.appendChild(renderer.domElement);
-
-          // Add lights
-          const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-          scene.add(ambientLight);
-          const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
-          directionalLight.position.set(10, 10, 10);
-          scene.add(directionalLight);
-
-          // Create mesh
-          const material = new THREE.MeshStandardMaterial({ 
-            color: 0x3b82f6,
-            metalness: 0.3,
-            roughness: 0.4,
-            side: THREE.DoubleSide
-          });
-          const mesh = new THREE.Mesh(clonedGeometry, material);
-          
-          // Center and scale
-          clonedGeometry.computeBoundingBox();
-          const boundingBox = clonedGeometry.boundingBox;
-          const center = new THREE.Vector3();
-          boundingBox.getCenter(center);
-          clonedGeometry.translate(-center.x, -center.y, -center.z);
-          
-          const size = new THREE.Vector3();
-          boundingBox.getSize(size);
-          const maxDim = Math.max(size.x, size.y, size.z);
-          const scale = 4 / maxDim;
-          mesh.scale.set(scale, scale, scale);
-          
-          scene.add(mesh);
-
-          // Add grid
-          const gridHelper = new THREE.GridHelper(20, 20, 0x3b82f6, 0x1e293b);
-          scene.add(gridHelper);
-
-          // Add controls
-          controls = new OrbitControls(camera, renderer.domElement);
-          controls.enableDamping = true;
-          controls.dampingFactor = 0.05;
-          controls.enableZoom = true;
-          controls.enablePan = true;
-
-          // Animation loop
-          const animate = () => {
-            animationFrameId = requestAnimationFrame(animate);
-            if (controls) {
-              controls.update();
-            }
-            renderer?.render(scene, camera);
-          };
-          animate();
-
-          setIsLoaded(true);
-          setDebugInfo('Loaded successfully');
-          console.log('ModelViewer: Successfully initialized');
-
-        } catch (error) {
-          console.error('ModelViewer: Error initializing:', error);
-          setDebugInfo(`Error: ${error}`);
-          setIsError(true);
-        }
-      };
-
-      // Initialize with a small delay
-      const timeoutId = setTimeout(initViewer, 50);
-
-      // Cleanup
-      return () => {
-        clearTimeout(timeoutId);
-        if (animationFrameId) {
-          cancelAnimationFrame(animationFrameId);
-        }
-        if (renderer && container) {
-          if (container.contains(renderer.domElement)) {
-            container.removeChild(renderer.domElement);
-          }
-          renderer.dispose();
-        }
-        if (controls) {
-          controls.dispose();
-        }
-      };
-    }, [geometry]);
-
-    if (isError) {
-      return (
-        <div className="w-full h-96 rounded-lg overflow-hidden bg-[#0f172a] flex flex-col items-center justify-center">
-          <p className="text-white text-sm mb-2">Error loading 3D model</p>
-          <p className="text-gray-400 text-xs">{debugInfo}</p>
-        </div>
-      );
-    }
-
-    if (!isLoaded) {
-      return (
-        <div className="w-full h-96 rounded-lg overflow-hidden bg-[#0f172a] flex flex-col items-center justify-center">
-          <p className="text-white text-sm mb-2">Loading 3D model...</p>
-          <p className="text-gray-400 text-xs">{debugInfo}</p>
-        </div>
-      );
-    }
-
-    return <div ref={containerRef} className="w-full h-96 rounded-lg overflow-hidden bg-[#0f172a]" />;
-  };
-
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -662,7 +603,7 @@ const PrintingService = () => {
             </div>
             
             {/* Free e-Book Section */}
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 flex items-center gap-4 min-w-[400px]">
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 flex items-center gap-4 min-w-[400px]">
               <div className="flex-1">
                 <p className="font-medium text-gray-700 text-sm">Get your free 3D Print e-Book</p>
                 <p className="text-xs text-gray-500">Learn tips and tricks for better prints</p>
@@ -705,7 +646,7 @@ const PrintingService = () => {
                       type="file"
                       id="file-upload"
                       multiple
-                      accept=".stl,.obj"
+                      accept=".stl,.obj,.gltf,.glb,.fbx,.ply"
                       className="hidden"
                       onChange={(e) => handleFileUpload(e.target.files)}
                     />
@@ -714,20 +655,20 @@ const PrintingService = () => {
                         Upload Model
                       </label>
                     </Button>
-                    <p className="text-xs text-gray-400 mt-4">Supported formats: STL, OBJ, STP, STEP, IGS, IGES</p>
+                    <p className="text-xs text-gray-400 mt-4">Supported formats: STL, OBJ, GLTF, GLB, FBX, PLY</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {/* 3D Model Viewer */}
+                    {/* 3D Model Viewer - Iframe */}
                     {uploadedFiles.length > 0 && (
                       <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
-                        {uploadedFiles[0].geometry ? (
-                          <ModelViewer geometry={uploadedFiles[0].geometry} />
-                        ) : (
-                          <div className="w-full h-96 bg-[#0f172a] flex items-center justify-center">
-                            <p className="text-white text-sm">No geometry available</p>
-                          </div>
-                        )}
+                        <iframe
+                          ref={iframeRef}
+                          src="/3d-viewer.html"
+                          className="w-full h-[500px]"
+                          title="3D Model Viewer"
+                          sandbox="allow-scripts allow-same-origin"
+                        />
                       </div>
                     )}
                     
@@ -764,7 +705,7 @@ const PrintingService = () => {
                         type="file"
                         id="file-upload-more"
                         multiple
-                        accept=".stl,.obj"
+                        accept=".stl,.obj,.gltf,.glb,.fbx,.ply"
                         className="hidden"
                         onChange={(e) => handleFileUpload(e.target.files)}
                       />
@@ -1319,7 +1260,7 @@ const PrintingService = () => {
               <a href="/contact" className="text-primary text-sm hover:underline">Click Here</a>
             </CardContent>
           </Card>
-          <Card className="border-l-4 border-l-purple-500">
+          <Card className="border-l-4 border-l-blue-500">
             <CardContent className="pt-4">
               <h4 className="font-semibold text-sm mb-1">15 Days Warranty</h4>
               <p className="text-xs text-gray-600 mb-2">Against sealed product defects</p>
@@ -1418,27 +1359,27 @@ const PrintingService = () => {
                   </div>
                   <p className="font-medium">Step 1</p>
                   <p className="text-sm text-gray-600">Upload Design</p>
-                  <ArrowDown className="w-5 h-5 mx-auto mt-2 text-gray-400" />
+                  <ArrowRight className="w-5 h-5 mx-auto mt-2 text-gray-400" />
                 </div>
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <Printer className="w-8 h-8 text-purple-600" />
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <Printer className="w-8 h-8 text-blue-600" />
                   </div>
                   <p className="font-medium">Step 2</p>
                   <p className="text-sm text-gray-600">Select Printer, Material & Infill</p>
-                  <ArrowDown className="w-5 h-5 mx-auto mt-2 text-gray-400" />
+                  <ArrowRight className="w-5 h-5 mx-auto mt-2 text-gray-400" />
                 </div>
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <Package className="w-8 h-8 text-green-600" />
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <Package className="w-8 h-8 text-blue-600" />
                   </div>
                   <p className="font-medium">Step 3</p>
                   <p className="text-sm text-gray-600">Add to Cart</p>
-                  <ArrowDown className="w-5 h-5 mx-auto mt-2 text-gray-400" />
+                  <ArrowRight className="w-5 h-5 mx-auto mt-2 text-gray-400" />
                 </div>
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <DollarSign className="w-8 h-8 text-orange-600" />
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <DollarSign className="w-8 h-8 text-blue-600" />
                   </div>
                   <p className="font-medium">Step 4</p>
                   <p className="text-sm text-gray-600">Checkout</p>
@@ -1447,7 +1388,7 @@ const PrintingService = () => {
             </div>
 
             {/* Key Features */}
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                 <div>
                   <h3 className="font-semibold text-lg mb-4">Key Features</h3>
@@ -1483,7 +1424,7 @@ const PrintingService = () => {
                   </ul>
                 </div>
                 <div className="flex justify-center">
-                  <div className="w-48 h-48 bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">
+                  <div className="w-48 h-48 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
                     <Printer className="w-24 h-24 text-white" />
                   </div>
                 </div>

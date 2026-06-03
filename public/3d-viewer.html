@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional 3D Model Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Space Mono', monospace;
+            background-color: #0d0d0f;
+            color: #ffffff;
+        }
+
+        #viewport {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Loading Spinner */
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        #loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #loading-text {
+            font-size: 14px;
+            color: #ffffff;
+        }
+
+        /* Toast Messages */
+        #toast-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: rgba(13, 13, 15, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 12px;
+            color: #ffffff;
+            animation: slideIn 0.3s ease;
+            pointer-events: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.error {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        .toast.success {
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="viewport">
+        <canvas id="canvas"></canvas>
+        
+        <!-- Loading Spinner -->
+        <div id="loading">
+            <div class="spinner"></div>
+            <div id="loading-text">Loading model...</div>
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toast-container"></div>
+    </div>
+
+    <!-- Three.js and Loaders -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/MTLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/PLYLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/ColladaLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/3MFLoader.js"></script>
+
+    <script>
+        // Global variables
+        let scene, camera, renderer, controls;
+        let currentModel = null;
+        let gridHelper, axesHelper;
+
+        // Initialize the scene
+        function init() {
+            const canvas = document.getElementById('canvas');
+            const viewport = document.getElementById('viewport');
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0d0d0f);
+
+            // Camera - use viewport dimensions for aspect ratio
+            const width = viewport.clientWidth || window.innerWidth;
+            const height = viewport.clientHeight || window.innerHeight;
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.set(5, 5, 5);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas, 
+                antialias: true, 
+                alpha: true,
+                preserveDrawingBuffer: true
+            });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.screenSpacePanning = false;
+            controls.minDistance = 0.5;
+            controls.maxDistance = 50;
+            controls.maxPolarAngle = Math.PI;
+
+            // Lighting
+            setupLighting('studio');
+
+            // Helpers
+            gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x222222);
+            scene.add(gridHelper);
+
+            axesHelper = new THREE.AxesHelper(2);
+            scene.add(axesHelper);
+
+            // Event listeners
+            window.addEventListener('resize', onWindowResize);
+
+            // Listen for messages from parent window
+            window.addEventListener('message', handleParentMessage);
+
+            // Start animation loop
+            animate();
+        }
+
+        // Handle messages from parent window
+        function handleParentMessage(event) {
+            if (event.data && event.data.type === 'loadModel') {
+                // Create a File object from the URL
+                fetch(event.data.fileUrl)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const file = new File([blob], event.data.fileName, { type: blob.type });
+                        loadModel(file);
+                    })
+                    .catch(error => {
+                        console.error('Error loading model from parent:', error);
+                        showToast('Error loading model from parent', 'error');
+                    });
+            }
+        }
+
+        function setupLighting(preset) {
+            // Remove existing lights
+            scene.children = scene.children.filter(child => !(child instanceof THREE.Light));
+
+            const presets = {
+                studio: {
+                    ambient: { intensity: 0.6, color: 0xffffff },
+                    directional: [
+                        { intensity: 0.8, position: [10, 10, 10], color: 0xffffff },
+                        { intensity: 0.4, position: [-10, -10, -10], color: 0xffffff }
+                    ]
+                },
+                outdoor: {
+                    ambient: { intensity: 0.4, color: 0x87ceeb },
+                    directional: [
+                        { intensity: 1.0, position: [50, 100, 50], color: 0xffffee },
+                        { intensity: 0.3, position: [-50, 50, -50], color: 0x87ceeb }
+                    ]
+                },
+                dark: {
+                    ambient: { intensity: 0.2, color: 0x333333 },
+                    directional: [
+                        { intensity: 0.5, position: [5, 5, 5], color: 0x666666 },
+                        { intensity: 0.2, position: [-5, -5, -5], color: 0x444444 }
+                    ]
+                }
+            };
+
+            const config = presets[preset] || presets.studio;
+
+            // Ambient light
+            const ambientLight = new THREE.AmbientLight(config.ambient.color, config.ambient.intensity);
+            scene.add(ambientLight);
+
+            // Directional lights
+            config.directional.forEach(lightConfig => {
+                const light = new THREE.DirectionalLight(lightConfig.color, lightConfig.intensity);
+                light.position.set(...lightConfig.position);
+                light.castShadow = true;
+                light.shadow.mapSize.width = 2048;
+                light.shadow.mapSize.height = 2048;
+                scene.add(light);
+            });
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Window resize handler
+        function onWindowResize() {
+            const viewport = document.getElementById('viewport');
+            const width = viewport.clientWidth || window.innerWidth;
+            const height = viewport.clientHeight || window.innerHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        // Load model
+        function loadModel(file) {
+            const extension = file.name.split('.').pop().toLowerCase();
+            const loading = document.getElementById('loading');
+            const loadingText = document.getElementById('loading-text');
+
+            // Show loading
+            loading.classList.add('active');
+            loadingText.textContent = `Loading ${file.name}...`;
+
+            // Remove old model
+            if (currentModel) {
+                disposeModel(currentModel);
+                scene.remove(currentModel);
+                currentModel = null;
+            }
+
+            const url = URL.createObjectURL(file);
+
+            // Choose appropriate loader based on file extension
+            let loader;
+            switch (extension) {
+                case 'glb':
+                case 'gltf':
+                    loader = new THREE.GLTFLoader();
+                    loader.load(url, (gltf) => {
+                        currentModel = gltf.scene;
+                        processModel(currentModel, file.name);
+                    }, undefined, onError);
+                    break;
+
+                case 'obj':
+                    loader = new THREE.OBJLoader();
+                    loader.load(url, (obj) => {
+                        currentModel = obj;
+                        processModel(currentModel, file.name);
+                    }, undefined, onError);
+                    break;
+
+                case 'fbx':
+                    loader = new THREE.FBXLoader();
+                    loader.load(url, (fbx) => {
+                        currentModel = fbx;
+                        processModel(currentModel, file.name);
+                    }, undefined, onError);
+                    break;
+
+                case 'stl':
+                    loader = new THREE.STLLoader();
+                    loader.load(url, (geometry) => {
+                        const material = new THREE.MeshStandardMaterial({ 
+                            color: 0x808080,
+                            metalness: 0.5,
+                            roughness: 0.5
+                        });
+                        currentModel = new THREE.Mesh(geometry, material);
+                        processModel(currentModel, file.name);
+                    }, undefined, onError);
+                    break;
+
+                case 'ply':
+                    loader = new THREE.PLYLoader();
+                    loader.load(url, (geometry) => {
+                        const material = new THREE.MeshStandardMaterial({ 
+                            color: 0x808080,
+                            metalness: 0.5,
+                            roughness: 0.5
+                        });
+                        currentModel = new THREE.Mesh(geometry, material);
+                        processModel(currentModel, file.name);
+                    }, undefined, onError);
+                    break;
+
+                case '3mf':
+                    loader = new THREE.ThreeMFLoader();
+                    loader.load(url, (object) => {
+                        currentModel = object;
+                        processModel(currentModel, file.name);
+                    }, undefined, onError);
+                    break;
+
+                case 'dae':
+                    loader = new THREE.ColladaLoader();
+                    loader.load(url, (collada) => {
+                        currentModel = collada.scene;
+                        processModel(currentModel, file.name);
+                    }, undefined, onError);
+                    break;
+
+                default:
+                    loading.classList.remove('active');
+                    showToast(`Unsupported file format: .${extension}`, 'error');
+                    URL.revokeObjectURL(url);
+                    return;
+            }
+
+            function onError(error) {
+                loading.classList.remove('active');
+                console.error('Error loading model:', error);
+                showToast('Error loading model. Check console for details.', 'error');
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // Process loaded model
+        function processModel(model, filename) {
+            const loading = document.getElementById('loading');
+            
+            // Enable shadows
+            model.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
+
+            // Center and scale model
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            
+            // Center model at origin
+            model.position.sub(center);
+            
+            // Scale model to fit in ~2 unit bounding box
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 2 / maxDim;
+            model.scale.set(scale, scale, scale);
+
+            // Rotate model to horizontal position (lying flat on grid)
+            model.rotation.x = -Math.PI / 2;
+
+            // Position model so it sits on the grid (y=0)
+            const scaledBox = new THREE.Box3().setFromObject(model);
+            const scaledSize = scaledBox.getSize(new THREE.Vector3());
+            model.position.y = scaledSize.y / 2;
+            
+            // Shift model: 8 units on x-axis, 5 units on y-axis
+            model.position.x += 8;
+            model.position.y += 5;
+
+            scene.add(model);
+            currentModel = model;
+
+            // Set camera to look at origin (center of axis lines)
+            camera.position.set(5, 5, 5);
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            // Hide loading
+            loading.classList.remove('active');
+            
+            showToast(`Loaded: ${filename}`, 'success');
+
+            URL.revokeObjectURL(URL.createObjectURL(new File([], filename)));
+        }
+
+        // Fit camera to model
+        function fitCameraToModel(model) {
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const fov = camera.fov * (Math.PI / 180);
+            let cameraZ = Math.abs(maxDim / 2 * Math.tan(fov * 2));
+            
+            cameraZ *= 2.0; // Add some padding
+            
+            camera.position.set(cameraZ, cameraZ, cameraZ);
+            controls.target.copy(center);
+            controls.update();
+        }
+
+        // Dispose model and its resources
+        function disposeModel(model) {
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    if (child.geometry) {
+                        child.geometry.dispose();
+                    }
+                    if (child.material) {
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(mat => mat.dispose());
+                        } else {
+                            child.material.dispose();
+                        }
+                    }
+                }
+            });
+        }
+
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                setTimeout(() => container.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        // Initialize on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

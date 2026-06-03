@@ -101,7 +101,7 @@ const LatestUpdatesSlider = () => {
 
   return (
     <div className="w-full bg-gradient-to-br from-[#0E3995] to-[#0E3995]">
-      <div className="container mx-auto max-w-7xl px-4 py-12">
+      <div className="w-full px-4 py-12">
         {/* Carousel */}
         <div className="relative flex items-center justify-center gap-4">
           {/* Navigation Arrows */}
@@ -112,7 +112,7 @@ const LatestUpdatesSlider = () => {
             <ChevronLeft className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
           </button>
 
-          <div className="flex-1 max-w-6xl">
+          <div className="flex-1 w-full">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
