@@ -6,6 +6,8 @@ import { products } from '@/types/product';
 const ProductDetail = () => {
   const { productId } = useParams();
   const product = products.find(p => p.id === productId);
+  const [quantity, setQuantity] = useState(1);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   if (!product) {
     return (
@@ -24,9 +26,6 @@ const ProductDetail = () => {
       </div>
     );
   }
-
-  const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const handleAddToCart = () => {
     console.log('Added to cart:', product.name, 'Quantity:', quantity);

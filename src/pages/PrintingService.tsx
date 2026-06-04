@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Printer, Package, DollarSign, Layers, Zap, Check, X, ArrowRight, ArrowDown, Info, FileText, Download, Trash2, ChevronDown, ChevronUp, Radio, Box, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -105,7 +105,7 @@ const PrintingService = () => {
   const selectedPrinter = PRINTER_OPTIONS.find(p => p.id === settings.printer);
 
   // Color mapping for material colors
-  const colorMap: Record<string, number> = {
+  const colorMap: Record<string, number> = useMemo(() => ({
     'White': 0xFFFFFF,
     'Black': 0x000000,
     'Red': 0xFF0000,
@@ -117,10 +117,10 @@ const PrintingService = () => {
     'Gray': 0x808080,
     'Silver': 0xC0C0C0,
     'Clear': 0xFFFFFF
-  };
+  }), []);
 
   // Function to update model color in iframe
-  const updateModelColor = (colorName: string) => {
+  const updateModelColor = useCallback((colorName: string) => {
     const colorHex = colorMap[colorName];
     if (!colorHex || !iframeRef.current) return;
 
@@ -130,10 +130,10 @@ const PrintingService = () => {
         color: colorHex
       }, '*');
     }
-  };
+  }, [colorMap]);
 
   // Parse 3D file and calculate volume and dimensions
-  const parse3DFile = async (file: File): Promise<{ volume: number; dimensions: { x: number; y: number; z: number }; geometry: THREE.BufferGeometry }> => {
+  const parse3DFile = useCallback(async (file: File): Promise<{ volume: number; dimensions: { x: number; y: number; z: number }; geometry: THREE.BufferGeometry }> => {
     return new Promise((resolve, reject) => {
       const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
       
@@ -278,7 +278,7 @@ const PrintingService = () => {
         reject(new Error('Unsupported file format'));
       }
     });
-  };
+  }, []);
 
   // Helper function to calculate volume and dimensions from geometry
   const calculateVolumeAndDimensions = (geometry: THREE.BufferGeometry): { volume: number; dimensions: { x: number; y: number; z: number }; geometry: THREE.BufferGeometry } => {
@@ -317,7 +317,7 @@ const PrintingService = () => {
   };
 
   // Estimate print time based on volume and settings (more accurate)
-  const estimatePrintTime = (volumeCm3: number, dimensions: { x: number; y: number; z: number }): string => {
+  const estimatePrintTime = useCallback((volumeCm3: number, dimensions: { x: number; y: number; z: number }): string => {
     // More accurate print time estimation based on:
     // - Volume
     // - Layer height (from printer selection)
@@ -358,7 +358,7 @@ const PrintingService = () => {
     const s = Math.floor(totalSecondsWithOverhead % 60);
     
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
+  }, [selectedPrinter, settings.infill, settings.supports]);
 
   // Calculate estimated price
   const calculatePrice = useCallback(() => {
@@ -487,7 +487,7 @@ const PrintingService = () => {
       
       toast.success(`${newFiles.length} file(s) uploaded successfully`);
     }
-  }, [selectedMaterial, parse3DFile, estimatePrintTime, settings.printer, settings.infill, settings.supports]);
+  }, [selectedMaterial, parse3DFile, estimatePrintTime]);
 
   // Recalculate print time when settings change
   useEffect(() => {
@@ -502,14 +502,14 @@ const PrintingService = () => {
         return file;
       }));
     }
-  }, [settings.printer, settings.infill, settings.supports, estimatePrintTime]);
+  }, [settings.printer, settings.infill, settings.supports, estimatePrintTime, uploadedFiles.length]);
 
   // Update model color when color changes
   useEffect(() => {
     if (settings.color) {
       updateModelColor(settings.color);
     }
-  }, [settings.color]);
+  }, [settings.color, updateModelColor]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -44,17 +44,17 @@ function PcbQuotation() {
   };
 
   // Color mapping for PCB colors
-  const colorMap: Record<string, number> = {
+  const colorMap: Record<string, number> = useMemo(() => ({
     green: 0x006400,
     red: 0xFF0000,
     yellow: 0xFFFF00,
     blue: 0x0000FF,
     white: 0xFFFFFF,
     black: 0x000000
-  };
+  }), []);
 
   // Function to update model color
-  const updateModelColor = (colorName: string) => {
+  const updateModelColor = useCallback((colorName: string) => {
     const colorHex = colorMap[colorName.toLowerCase()];
     if (!colorHex || !currentModelRef.current) return;
 
@@ -77,9 +77,9 @@ function PcbQuotation() {
         }
       }
     });
-  };
+  }, [colorMap]);
 
-  const calculatePrice = () => {
+  const calculatePrice = useCallback(() => {
     // Base price per PCB based on layers
     const layerPrices: Record<string, number> = {
       '1': 50,
@@ -133,7 +133,7 @@ function PcbQuotation() {
 
     // Round to 2 decimal places
     setCalculatedPrice(Math.round(totalPrice * 100) / 100);
-  };
+  }, [formData]);
 
   // Function to calculate volume and dimensions from geometry
   const calculateVolumeAndDimensions = (geometry: THREE.BufferGeometry): { volume: number; dimensions: { x: number; y: number; z: number; }; } => {
@@ -238,7 +238,7 @@ function PcbQuotation() {
     // Load model based on file type
     switch (fileExtension) {
       case 'glb':
-      case 'gltf':
+      case 'gltf': {
         const gltfLoader = new GLTFLoader();
         gltfLoader.load(url, (gltf) => {
           const model = gltf.scene;
@@ -266,8 +266,9 @@ function PcbQuotation() {
           currentModelRef.current = model;
         });
         break;
+      }
 
-      case 'obj':
+      case 'obj': {
         const objLoader = new OBJLoader();
         objLoader.load(url, (obj) => {
           // Extract geometry for volume calculation
@@ -293,8 +294,9 @@ function PcbQuotation() {
           currentModelRef.current = obj;
         });
         break;
+      }
 
-      case 'stl':
+      case 'stl': {
         const stlLoader = new STLLoader();
         stlLoader.load(url, (geometry) => {
           const { volume, dimensions } = calculateVolumeAndDimensions(geometry);
@@ -316,8 +318,9 @@ function PcbQuotation() {
           currentModelRef.current = mesh;
         });
         break;
+      }
 
-      case 'fbx':
+      case 'fbx': {
         const fbxLoader = new FBXLoader();
         fbxLoader.load(url, (obj) => {
           // Extract geometry for volume calculation
@@ -343,6 +346,7 @@ function PcbQuotation() {
           currentModelRef.current = obj;
         });
         break;
+      }
 
       default:
         console.error('Unsupported file format:', fileExtension);
@@ -513,12 +517,20 @@ function PcbQuotation() {
     // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (pcbViewerRef.current) {
-        pcbViewerRef.current.removeChild(renderer.domElement);
+      const currentRenderer = rendererRef.current;
+      const currentControls = controlsRef.current;
+      if (currentRenderer) {
+        const domElement = currentRenderer.domElement;
+        if (domElement && domElement.parentNode) {
+          domElement.parentNode.removeChild(domElement);
+        }
+        currentRenderer.dispose();
       }
-      renderer.dispose();
-      controls.dispose();
+      if (currentControls) {
+        currentControls.dispose();
+      }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update model color when PCB color changes
@@ -526,12 +538,12 @@ function PcbQuotation() {
     if (formData.pcbColor) {
       updateModelColor(formData.pcbColor);
     }
-  }, [formData.pcbColor]);
+  }, [formData.pcbColor, updateModelColor]);
 
   // Recalculate price when form data changes
   useEffect(() => {
     calculatePrice();
-  }, [formData]);
+  }, [formData, calculatePrice]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
