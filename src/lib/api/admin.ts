@@ -51,11 +51,11 @@ export const servicesAPI = {
     const response = await api.get(`/admin/services/${id}`);
     return response.data;
   },
-  createService: async (data: any) => {
+  createService: async (data: unknown) => {
     const response = await api.post('/admin/services', data);
     return response.data;
   },
-  updateService: async (id: string, data: any) => {
+  updateService: async (id: string, data: unknown) => {
     const response = await api.put(`/admin/services/${id}`, data);
     return response.data;
   },
@@ -75,11 +75,11 @@ export const usersAPI = {
     const response = await api.get(`/admin/users/${id}`);
     return response.data;
   },
-  createUser: async (data: any) => {
+  createUser: async (data: unknown) => {
     const response = await api.post('/admin/users', data);
     return response.data;
   },
-  updateUser: async (id: string, data: any) => {
+  updateUser: async (id: string, data: unknown) => {
     const response = await api.put(`/admin/users/${id}`, data);
     return response.data;
   },
@@ -99,11 +99,11 @@ export const blogAPI = {
     const response = await api.get(`/admin/posts/${id}`);
     return response.data;
   },
-  createPost: async (data: any) => {
+  createPost: async (data: unknown) => {
     const response = await api.post('/admin/posts', data);
     return response.data;
   },
-  updatePost: async (id: string, data: any) => {
+  updatePost: async (id: string, data: unknown) => {
     const response = await api.put(`/admin/posts/${id}`, data);
     return response.data;
   },
@@ -123,11 +123,11 @@ export const sliderUpdatesAPI = {
     const response = await api.get(`/slider-updates/${id}`);
     return response.data;
   },
-  createSliderUpdate: async (data: any) => {
+  createSliderUpdate: async (data: unknown) => {
     const response = await api.post('/slider-updates', data);
     return response.data;
   },
-  updateSliderUpdate: async (id: string, data: any) => {
+  updateSliderUpdate: async (id: string, data: unknown) => {
     const response = await api.put(`/slider-updates/${id}`, data);
     return response.data;
   },
