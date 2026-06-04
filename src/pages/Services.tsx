@@ -84,6 +84,8 @@ const Services = () => {
   const handleGetQuote = () => {
     if (selectedService?.title === '3D Printing') {
       window.location.href = '/printing-service';
+    } else if (selectedService?.title === 'PCB Design') {
+      window.location.href = '/pcb-quotation';
     } else {
       window.location.href = '/quotes';
     }

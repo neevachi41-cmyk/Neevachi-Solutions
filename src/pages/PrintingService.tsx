@@ -104,6 +104,34 @@ const PrintingService = () => {
   const selectedMaterial = MATERIALS.find(m => m.id === settings.material);
   const selectedPrinter = PRINTER_OPTIONS.find(p => p.id === settings.printer);
 
+  // Color mapping for material colors
+  const colorMap: Record<string, number> = {
+    'White': 0xFFFFFF,
+    'Black': 0x000000,
+    'Red': 0xFF0000,
+    'Blue': 0x0000FF,
+    'Green': 0x006400,
+    'Yellow': 0xFFFF00,
+    'Orange': 0xFFA500,
+    'Purple': 0x800080,
+    'Gray': 0x808080,
+    'Silver': 0xC0C0C0,
+    'Clear': 0xFFFFFF
+  };
+
+  // Function to update model color in iframe
+  const updateModelColor = (colorName: string) => {
+    const colorHex = colorMap[colorName];
+    if (!colorHex || !iframeRef.current) return;
+
+    if (iframeRef.current.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({
+        type: 'updateColor',
+        color: colorHex
+      }, '*');
+    }
+  };
+
   // Parse 3D file and calculate volume and dimensions
   const parse3DFile = async (file: File): Promise<{ volume: number; dimensions: { x: number; y: number; z: number }; geometry: THREE.BufferGeometry }> => {
     return new Promise((resolve, reject) => {
@@ -365,8 +393,20 @@ const PrintingService = () => {
     };
     basePrice += postProcessingCosts[settings.postProcessing] || 0;
 
-    // Apply quantity
-    const totalPrice = basePrice * settings.quantity;
+    // Apply quantity multiplier (discount for bulk orders)
+    let quantityMultiplier = 1.0;
+
+    if (settings.quantity >= 100) {
+      quantityMultiplier = 0.7; // 30% discount for 100+
+    } else if (settings.quantity >= 50) {
+      quantityMultiplier = 0.8; // 20% discount for 50+
+    } else if (settings.quantity >= 20) {
+      quantityMultiplier = 0.9; // 10% discount for 20+
+    } else if (settings.quantity >= 10) {
+      quantityMultiplier = 0.95; // 5% discount for 10+
+    }
+
+    const totalPrice = basePrice * settings.quantity * quantityMultiplier;
 
     // Minimum order value
     return Math.max(totalPrice, 50);
@@ -463,6 +503,13 @@ const PrintingService = () => {
       }));
     }
   }, [settings.printer, settings.infill, settings.supports, estimatePrintTime]);
+
+  // Update model color when color changes
+  useEffect(() => {
+    if (settings.color) {
+      updateModelColor(settings.color);
+    }
+  }, [settings.color]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -573,7 +620,7 @@ const PrintingService = () => {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">Robu Online FDM 3D Printing Service</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Neevachi Online FDM 3D Printing Service</h1>
             <p className="text-blue-100">Professional FDM 3D printing services with fast turnaround</p>
           </motion.div>
         </div>
@@ -584,7 +631,7 @@ const PrintingService = () => {
         <div className="mb-6 bg-white rounded-lg p-6 border border-gray-200">
           <div className="flex flex-wrap gap-6 items-start">
             <div className="flex-1 min-w-[300px]">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Robu Online FDM 3D Printing Service</h1>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Neevachi Online FDM 3D Printing Service</h1>
               <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                 <span className="flex items-center gap-1">
                   <span className="text-yellow-500">★★★★★</span>
@@ -1146,6 +1193,20 @@ const PrintingService = () => {
                                 <span className="text-gray-600">Quantity</span>
                                 <span className="font-medium">x{settings.quantity}</span>
                               </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Price per Unit</span>
+                                <span className="font-medium">₹{(totalPrice / settings.quantity).toFixed(2)}</span>
+                              </div>
+                              {settings.quantity >= 10 && (
+                                <div className="flex justify-between text-green-600">
+                                  <span className="text-sm">Bulk Discount Applied</span>
+                                  <span className="text-sm font-medium">
+                                    {settings.quantity >= 100 ? '30% off' :
+                                     settings.quantity >= 50 ? '20% off' :
+                                     settings.quantity >= 20 ? '10% off' : '5% off'}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                             <Separator />
                             <div className="flex justify-between items-center">
