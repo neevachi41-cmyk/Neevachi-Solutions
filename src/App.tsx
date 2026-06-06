@@ -26,6 +26,7 @@ import ProjectDetailTemp from './pages/ProjectDetailTemp';
 import Projects from './pages/Projects';
 import Quotes from './pages/Quotes';
 import Register from './pages/Register';
+import RequestCustomProduct from './pages/RequestCustomProduct';
 import Services from './pages/Services';
 import Shop from './pages/Shop';
 import Workflow from './pages/Workflow';
@@ -77,6 +78,7 @@ const App: React.FC = () => {
                   <Route path="/all-projects" element={<AllProjects />} />
                   <Route path="/printing-service" element={<PrintingService />} />
                   <Route path="/pcb-quotation" element={<PcbQuotation />} />
+                  <Route path="/request-custom-product" element={<RequestCustomProduct />} />
                   
                   {/* Protected routes */}
                   <Route path="/admin" element={

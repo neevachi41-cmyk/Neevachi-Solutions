@@ -186,8 +186,8 @@ export default function GetQuotes() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Email us at</p>
-                    <a href="mailto:contact@neevachisolutions.com" className="font-medium hover:underline">
-                      contact@neevachisolutions.com
+                    <a href="mailto:info@neevachi.in" className="font-medium hover:underline">
+                      info@neevachi.in
                     </a>
                   </div>
                 </div>
@@ -197,8 +197,8 @@ export default function GetQuotes() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Call us at</p>
-                    <a href="tel:+1234567890" className="font-medium hover:underline">
-                      +1 (234) 567-890
+                    <a href="tel:+919922552891" className="font-medium hover:underline">
+                      +91 9922552891, +91 9403497065
                     </a>
                   </div>
                 </div>

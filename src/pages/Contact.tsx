@@ -19,7 +19,7 @@ const contactInfo = [
   {
     icon: Phone,
     title: "Phone Number",
-    details: "+91 9922552891, +91 9403497065"
+    details: "+91 9922552891\n+91 9403497065"
   },
   {
     icon: Mail,
@@ -157,7 +157,7 @@ const Contact = () => {
                       <item.icon />
                     </div>
                     <h3 className="font-semibold text-gray-800 mb-2">{item.title}</h3>
-                    <p className="text-gray-600 text-sm">{item.details}</p>
+                    <p className="text-gray-600 text-sm whitespace-pre-line">{item.details}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -357,10 +357,10 @@ const Contact = () => {
                   </p>
                   <div className="space-y-2">
                     <p className="text-sm">
-                      <strong>Email:</strong> business@neevachisolutions.com
+                      <strong>Email:</strong> info@neevachi.in
                     </p>
-                    <p className="text-sm">
-                      <strong>Phone:</strong> +91 98765 43211
+                    <p className="text-sm whitespace-pre-line">
+                      <strong>Contact:</strong> +91 9922552891, +91 9403497065
                     </p>
                   </div>
                 </CardContent>

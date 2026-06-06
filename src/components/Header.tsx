@@ -142,15 +142,15 @@ export function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => (
-              <NavLink 
+              <NavLink
                 key={item.path}
                 to={item.path}
-                className={({ isActive }) => 
+                className={({ isActive }) =>
                   cn(
-                    "px-4 py-2 text-sm font-medium",
-                    isActive 
-                      ? "text-blue-600 font-semibold" 
-                      : "text-gray-600 hover:text-blue-600"
+                    "px-4 py-2 text-sm font-medium transition-colors duration-200 relative group",
+                    isActive
+                      ? "text-blue-600 font-semibold"
+                      : "text-gray-600 hover:text-blue-600 hover:bg-primary/5"
                   )
                 }
                 onClick={(e) => {
@@ -158,6 +158,7 @@ export function Header() {
                 }}
               >
                 {item.name}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
               </NavLink>
             ))}
             
@@ -169,16 +170,16 @@ export function Header() {
               </div>
             ) : (
               <>
-                <NavLink 
-                  to="/login" 
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-foreground/80 hover:text-primary hover:bg-primary/5 relative"
+                <NavLink
+                  to="/login"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-foreground/80 hover:text-primary hover:bg-primary/5 relative transition-colors duration-200"
                 >
                   Login
                 </NavLink>
-                
-                <NavLink 
-                  to="/register" 
-                  className="ml-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white relative"
+
+                <NavLink
+                  to="/register"
+                  className="ml-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white relative transition-colors duration-200"
                 >
                   <span className="flex items-center justify-center gap-1.5">
                     Get Started
@@ -222,10 +223,10 @@ export function Header() {
                   to={item.path}
                   className={({ isActive }) =>
                     cn(
-                      'block px-4 py-3 text-base font-medium rounded-lg',
+                      'block px-4 py-3 text-base font-medium rounded-lg transition-colors duration-200',
                       isActive
                         ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
                     )
                   }
                   onClick={() => setIsMobileMenuOpen(false)}

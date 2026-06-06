@@ -285,6 +285,7 @@ const About = () => {
             <Button
               size="lg"
               className="px-8 h-14 text-base font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              onClick={() => window.location.href = '/contact'}
             >
               Get in Touch
               <Rocket className="ml-3 h-5 w-5" />

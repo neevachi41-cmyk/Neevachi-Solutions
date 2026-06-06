@@ -28,7 +28,9 @@ export function CTASection() {
   const navigate = useNavigate();
 
   const handleQuotationClick = (service: string) => {
-    if (service) {
+    if (service === "PCB Design & Manufacturing") {
+      navigate("/quotes");
+    } else if (service) {
       navigate("/contact", { state: { service } });
     } else {
       navigate("/contact");

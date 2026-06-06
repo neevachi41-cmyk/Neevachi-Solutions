@@ -189,14 +189,12 @@ export default function Shop() {
         {selectedCategory !== 'all' && (
           <div className="mb-8">
 
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center space-x-4">
-                <h2 className="text-xl font-semibold">
-                  {categories.find(c => c.id === selectedCategory)?.name}
-                  <span className="text-sm text-gray-500 ml-2">({filteredProducts.length})</span>
-                </h2>
-              </div>
-              <div className="flex items-center">
+            <div className="flex flex-col items-center mb-6">
+              <h2 className="text-xl font-semibold text-center">
+                {categories.find(c => c.id === selectedCategory)?.name}
+                <span className="text-sm text-gray-500 ml-2">({filteredProducts.length})</span>
+              </h2>
+              <div className="flex items-center mt-4">
                 <label htmlFor="sort" className="text-sm text-gray-600 mr-2">Sort by:</label>
                 <select
                   id="sort"
@@ -236,9 +234,9 @@ export default function Shop() {
             {customProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
-            <div 
+            <div
               className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center min-h-[300px] hover:border-blue-500 transition-colors cursor-pointer bg-gray-50 hover:bg-blue-50"
-              onClick={() => setIsCustomProductModalOpen(true)}
+              onClick={() => window.location.href = '/request-custom-product'}
             >
               <div className="bg-blue-100 p-4 rounded-full mb-4">
                 <Plus className="w-8 h-8 text-blue-600" />
@@ -258,26 +256,29 @@ const ProductCard = ({ product }: { product: Product }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   
   if (product.isCustomProduct) {
+    const handleCustomProductClick = () => {
+      if (product.name === '3D Printing') {
+        window.location.href = '/printing-service';
+      } else if (product.name === 'Custom PCB Design') {
+        window.location.href = '/pcb-quotation';
+      }
+    };
+
     return (
-      <div 
-        className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow border-2 border-dashed border-gray-300 flex flex-col items-center justify-center p-8 text-center cursor-pointer"
-        onClick={() => {
-          // In a real app, you would open the custom product modal here
-          // For now, we'll just log to the console
-          console.log('Custom product clicked');
-        }}
+      <div
+        className="bg-gray-50 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 flex flex-col items-center justify-center p-8 text-center cursor-pointer"
+        onClick={handleCustomProductClick}
       >
         <div className="bg-blue-100 p-4 rounded-full mb-4">
           <Plus className="h-8 w-8 text-blue-600" />
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-1">{product.name}</h3>
         <p className="text-gray-500 text-sm mb-4">Click to configure your custom solution</p>
-        <button 
+        <button
           className="text-blue-600 hover:text-blue-800 font-medium text-sm"
           onClick={(e) => {
             e.stopPropagation();
-            // In a real app, you would open the custom product modal here
-            console.log('Configure custom product');
+            handleCustomProductClick();
           }}
         >
           Get Started

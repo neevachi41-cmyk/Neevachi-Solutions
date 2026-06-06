@@ -22,15 +22,15 @@ export function Footer() {
               <p className="font-semibold text-white mb-2">Address:</p>
               <p>Flat No. S No 50, Survey Number :50, Office No 1 15/1, Samarth Sankul near Bank of Maharashtra, Pune Pune, MAHARASHTRA, 411041</p>
             </div>
-            <div className="text-blue-50 text-sm max-w-md mb-4">
-              <p className="font-semibold text-white mb-2">Email:</p>
-              <p>info@neevachi.in</p>
-              <p className="font-semibold text-white mb-2 mt-4">Contact:</p>
-              <p>+91 9922552891, +91 9403497065</p>
-            </div>
-            <div className="text-blue-50 text-sm max-w-md mb-4">
-              <p className="font-semibold text-white mb-2">GSTIN:</p>
-              <p>27GYTPM3198G1ZK</p>
+            <div className="text-blue-50 text-sm max-w-md mb-4 flex gap-8">
+              <div>
+                <p className="font-semibold text-white mb-2">Email:</p>
+                <p>info@neevachi.in</p>
+              </div>
+              <div>
+                <p className="font-semibold text-white mb-2">Contact:</p>
+                <p>+91 9922552891, +91 9403497065</p>
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <a href="#" className="text-white hover:text-blue-200 transition-colors">
@@ -79,20 +79,16 @@ export function Footer() {
           <div>
             <h4 className="font-heading font-semibold text-white mb-4">Company</h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-sm text-blue-50 hover:text-white transition-colors flex items-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-200 mr-2"></span>
+              <li><a href="#" className="text-sm text-blue-50 hover:text-white transition-colors">
                 About Us
               </a></li>
-              <li><a href="#" className="text-sm text-blue-50 hover:text-white transition-colors flex items-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-200 mr-2"></span>
+              <li><a href="#" className="text-sm text-blue-50 hover:text-white transition-colors">
                 Projects
               </a></li>
-              <li><a href="#" className="text-sm text-blue-50 hover:text-white transition-colors flex items-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-200 mr-2"></span>
+              <li><a href="#" className="text-sm text-blue-50 hover:text-white transition-colors">
                 Contact
               </a></li>
-              <li><a href="#" className="text-sm text-blue-50 hover:text-white transition-colors flex items-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-200 mr-2"></span>
+              <li><a href="#" className="text-sm text-blue-50 hover:text-white transition-colors">
                 Careers
               </a></li>
             </ul>

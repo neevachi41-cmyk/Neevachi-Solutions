@@ -54,6 +54,18 @@ export const products: Product[] = [
     isNew: true,
     isCustomProduct: true
   },
+  {
+    id: 'custom-2',
+    name: '3D Printing',
+    price: 0,
+    image: 'https://images.unsplash.com/photo-1565439396361-3698684ae5c2?w=600&q=80',
+    category: 'all',
+    rating: 4.9,
+    reviewCount: 0,
+    inStock: true,
+    isNew: true,
+    isCustomProduct: true
+  },
   
   // PCB Boards
   {

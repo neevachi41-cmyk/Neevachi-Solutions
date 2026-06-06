@@ -169,6 +169,24 @@ export function ServicesSection({ clickable = true }: { clickable?: boolean }) {
             </motion.div>
           ))}
         </motion.div>
+
+        {!clickable && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-center mt-12"
+          >
+            <button
+              onClick={() => window.location.href = '/services'}
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
+            >
+              View All Services
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </motion.div>
+        )}
       </div>
 
       {/* Modal */}
