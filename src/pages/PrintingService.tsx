@@ -406,11 +406,12 @@ const PrintingService = () => {
       quantityMultiplier = 0.95; // 5% discount for 10+
     }
 
-    const totalPrice = basePrice * settings.quantity * quantityMultiplier;
+    // Minimum order value per unit
+    const unitPrice = Math.max(basePrice, 50);
+    const totalPrice = unitPrice * settings.quantity * quantityMultiplier;
 
-    // Minimum order value
-    return Math.max(totalPrice, 50);
-  }, [uploadedFiles, selectedMaterial, selectedPrinter, settings]);
+    return totalPrice;
+  }, [uploadedFiles, selectedMaterial, selectedPrinter, settings.infill, settings.quantity, settings.supports, settings.postProcessing]);
 
   const totalPrice = calculatePrice();
 

@@ -202,7 +202,7 @@ function PcbQuotation() {
     const finalMin = finalBox.min;
 
     // Position model so its bottom sits exactly on the grid (y=0)
-    object.position.y = -finalMin.y;
+    object.position.y -= finalMin.y;
 
     // Update camera to look at origin
     if (cameraRef.current) {
@@ -789,7 +789,7 @@ function PcbQuotation() {
                 </div>
 
                 {/* Price Display */}
-                {calculatedPrice > 0 && (
+                {uploadedFileName && calculatedPrice > 0 && (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-2">
                     <h4 className="font-semibold text-gray-900 text-sm">Estimated Price</h4>
                     <div className="flex justify-between items-center">
