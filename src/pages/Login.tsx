@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FcGoogle } from 'react-icons/fc';
+import { useAuth } from '@/contexts/AuthContext';
 
 import { ArrowRight, Eye, EyeOff, Facebook, Lock, Mail } from 'lucide-react';
 
@@ -12,6 +13,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,11 +23,9 @@ const Login = () => {
     }
     
     setIsLoading(true);
+    setError('');
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Login successful:', { email });
-      navigate('/');
+      await login(email, password);
     } catch (err) {
       setError('Failed to sign in. Please try again.');
     } finally {

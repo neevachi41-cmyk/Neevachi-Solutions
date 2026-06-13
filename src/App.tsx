@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 
 import { Layout } from './components/Layout';
 import { ScrollToTop } from './components/ScrollToTop';
+import ProtectedRoute from './components/ProtectedRoute';
 
 import About from './pages/About';
 import AllProjects from './pages/AllProjects';
@@ -33,23 +34,9 @@ import Shop from './pages/Shop';
 import Workflow from './pages/Workflow';
 import AdminDashboard from './pages/AdminDashboard';
 import SliderUpdatesAdmin from './pages/SliderUpdatesAdmin';
+import Unauthorized from './pages/Unauthorized';
 
 const queryClient = new QueryClient();
-
-// Protected Route Component
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
-  
-  if (loading) {
-    return <div>Loading...</div>; // Or a loading spinner
-  }
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
-};
 
 const App: React.FC = () => {
   return (
@@ -84,12 +71,12 @@ const App: React.FC = () => {
                   
                   {/* Protected routes */}
                   <Route path="/admin" element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['admin']}>
                       <AdminDashboard />
                     </ProtectedRoute>
                   } />
                   <Route path="/admin/slider-updates" element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['admin']}>
                       <SliderUpdatesAdmin />
                     </ProtectedRoute>
                   } />
@@ -100,6 +87,7 @@ const App: React.FC = () => {
                 {/* Auth routes without layout */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/unauthorized" element={<Unauthorized />} />
               </Routes>
             </TooltipProvider>
           </AuthProvider>

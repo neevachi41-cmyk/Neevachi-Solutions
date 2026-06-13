@@ -30,6 +30,10 @@ export const authAPI = {
     const response = await api.post('/auth/login', { email, password });
     return response.data;
   },
+  register: async (email: string, password: string) => {
+    const response = await api.post('/auth/register', { email, password });
+    return response.data;
+  },
   getMe: async () => {
     const response = await api.get('/auth/me');
     return response.data;
@@ -109,6 +113,18 @@ export const blogAPI = {
   },
   deletePost: async (id: string) => {
     const response = await api.delete(`/admin/posts/${id}`);
+    return response.data;
+  },
+};
+
+// Contact API
+export const contactAPI = {
+  submitContact: async (data: { name: string; email: string; message: string }) => {
+    const response = await api.post('/contact', data);
+    return response.data;
+  },
+  getContacts: async (params = {}) => {
+    const response = await api.get('/contact', { params });
     return response.data;
   },
 };

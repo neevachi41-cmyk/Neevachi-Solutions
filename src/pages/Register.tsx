@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { authAPI } from '@/lib/api/admin';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,13 +47,12 @@ const Register = () => {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      console.log('Registration attempt with:', data);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // Redirect to login after successful registration
+      await authAPI.register(data.email, data.password);
+      toast.success('Registration successful! Please login.');
       navigate('/login');
     } catch (error) {
       console.error('Registration failed:', error);
+      toast.error(error instanceof Error ? error.message : 'Registration failed');
     } finally {
       setIsLoading(false);
     }

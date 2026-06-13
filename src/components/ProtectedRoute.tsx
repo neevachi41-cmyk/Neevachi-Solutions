@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
-  const { isAuthenticated, user, loading } = useAuth();
+  const { isAuthenticated, isAdmin, user, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
