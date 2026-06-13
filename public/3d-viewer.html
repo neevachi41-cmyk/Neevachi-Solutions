@@ -21,8 +21,8 @@
 
         body {
             font-family: 'JetBrains Mono', 'Space Mono', monospace;
-            background-color: #0d0d0f;
-            color: #ffffff;
+            background-color: #ffffff;
+            color: #000000;
         }
 
         #viewport {
@@ -158,7 +158,7 @@
 
             // Scene
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0d0d0f);
+            scene.background = new THREE.Color(0xffffff);
 
             // Camera - use viewport dimensions for aspect ratio
             const width = viewport.clientWidth || window.innerWidth;
@@ -175,8 +175,7 @@
             });
             renderer.setSize(width, height);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.shadowMap.enabled = false;
             renderer.outputEncoding = THREE.sRGBEncoding;
 
             // Controls
@@ -191,9 +190,22 @@
             // Lighting
             setupLighting('studio');
 
-            // Helpers
-            gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x222222);
+            // Helpers - Paper-like flat grid
+            gridHelper = new THREE.GridHelper(100, 100, 0xcccccc, 0xe5e5e5);
             scene.add(gridHelper);
+
+            // Add dark gray plane under grid
+            const planeGeometry = new THREE.PlaneGeometry(100, 100);
+            const planeMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x1a1a1a,
+                roughness: 0.9,
+                metalness: 0.0
+            });
+            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.rotation.x = -Math.PI / 2;
+            plane.position.y = -0.01;
+            plane.receiveShadow = false;
+            scene.add(plane);
 
             axesHelper = new THREE.AxesHelper(2);
             scene.add(axesHelper);
@@ -232,7 +244,9 @@
         function updateModelColor(colorHex) {
             if (!currentModel) return;
 
+            console.log('Updating model color to:', colorHex);
             const newColor = new THREE.Color(colorHex);
+            console.log('Color object:', newColor, 'Hex:', newColor.getHexString());
 
             // Traverse the model and update all mesh materials
             currentModel.traverse((child) => {
@@ -242,13 +256,43 @@
                         child.material.forEach((mat) => {
                             if (mat.color) {
                                 mat.color.set(newColor);
+                                console.log('Updated material color (array) to:', mat.color.getHexString());
                             }
+                            // Set emissive to black to prevent glow
+                            if (mat.emissive) {
+                                mat.emissive.set(0x000000);
+                            }
+                            // Remove texture maps that might override color
+                            if (mat.map) {
+                                mat.map = null;
+                            }
+                            if (mat.emissiveMap) {
+                                mat.emissiveMap = null;
+                            }
+                            mat.needsUpdate = true;
                         });
-                    } else if (child.material.color) {
-                        child.material.color.set(newColor);
+                    } else {
+                        if (child.material.color) {
+                            child.material.color.set(newColor);
+                            console.log('Updated material color (single) to:', child.material.color.getHexString());
+                        }
+                        // Set emissive to black to prevent glow
+                        if (child.material.emissive) {
+                            child.material.emissive.set(0x000000);
+                        }
+                        // Remove texture maps that might override color
+                        if (child.material.map) {
+                            child.material.map = null;
+                        }
+                        if (child.material.emissiveMap) {
+                            child.material.emissiveMap = null;
+                        }
+                        child.material.needsUpdate = true;
                     }
                 }
             });
+            
+            console.log('Color update complete');
         }
 
         function setupLighting(preset) {
@@ -257,24 +301,26 @@
 
             const presets = {
                 studio: {
-                    ambient: { intensity: 0.6, color: 0xffffff },
+                    ambient: { intensity: 1.2, color: 0xffffff },
                     directional: [
-                        { intensity: 0.8, position: [10, 10, 10], color: 0xffffff },
-                        { intensity: 0.4, position: [-10, -10, -10], color: 0xffffff }
+                        { intensity: 1.5, position: [10, 10, 10], color: 0xffffff },
+                        { intensity: 1.0, position: [-10, -10, -10], color: 0xffffff },
+                        { intensity: 0.8, position: [0, 10, 0], color: 0xffffff },
+                        { intensity: 0.5, position: [-10, 5, -10], color: 0xffffff } // Rim light
                     ]
                 },
                 outdoor: {
-                    ambient: { intensity: 0.4, color: 0x87ceeb },
+                    ambient: { intensity: 0.8, color: 0x87ceeb },
                     directional: [
-                        { intensity: 1.0, position: [50, 100, 50], color: 0xffffee },
-                        { intensity: 0.3, position: [-50, 50, -50], color: 0x87ceeb }
+                        { intensity: 1.5, position: [50, 100, 50], color: 0xffffee },
+                        { intensity: 0.8, position: [-50, 50, -50], color: 0x87ceeb }
                     ]
                 },
                 dark: {
-                    ambient: { intensity: 0.2, color: 0x333333 },
+                    ambient: { intensity: 0.6, color: 0x333333 },
                     directional: [
-                        { intensity: 0.5, position: [5, 5, 5], color: 0x666666 },
-                        { intensity: 0.2, position: [-5, -5, -5], color: 0x444444 }
+                        { intensity: 1.0, position: [5, 5, 5], color: 0x666666 },
+                        { intensity: 0.6, position: [-5, -5, -5], color: 0x444444 }
                     ]
                 }
             };
@@ -289,9 +335,7 @@
             config.directional.forEach(lightConfig => {
                 const light = new THREE.DirectionalLight(lightConfig.color, lightConfig.intensity);
                 light.position.set(...lightConfig.position);
-                light.castShadow = true;
-                light.shadow.mapSize.width = 2048;
-                light.shadow.mapSize.height = 2048;
+                light.castShadow = false;
                 scene.add(light);
             });
         }
@@ -421,11 +465,11 @@
         function processModel(model, filename) {
             const loading = document.getElementById('loading');
             
-            // Enable shadows
+            // Disable shadows
             model.traverse((child) => {
                 if (child.isMesh && child.material) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
+                    child.castShadow = false;
+                    child.receiveShadow = false;
                 }
             });
 
@@ -443,11 +487,20 @@
             const scaledBox = new THREE.Box3().setFromObject(model);
             const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
 
+            // Rotate model to lay flat on the grid
+            model.rotation.x = Math.PI / 2;
+            model.rotation.z = Math.PI / 2;
+            model.rotation.y = Math.PI; // Flip 180 degrees so face is above grid
+
+            // Recalculate bounding box after rotation
+            const rotatedBox = new THREE.Box3().setFromObject(model);
+            const rotatedCenter = rotatedBox.getCenter(new THREE.Vector3());
+
             // Center model horizontally and place flat on grid (bottom at y=0)
             model.position.set(
-                -scaledCenter.x,
-                -scaledBox.min.y,
-                -scaledCenter.z
+                -rotatedCenter.x,
+                -rotatedBox.min.y,
+                -rotatedCenter.z
             );
 
             scene.add(model);

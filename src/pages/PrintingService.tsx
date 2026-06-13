@@ -127,13 +127,13 @@ const PrintingService = () => {
     if (iframeRef.current.contentWindow) {
       iframeRef.current.contentWindow.postMessage({
         type: 'updateColor',
-        color: colorHex
+        color: '#' + colorHex.toString(16).padStart(6, '0')
       }, '*');
     }
   }, [colorMap]);
 
   // Parse 3D file and calculate volume and dimensions
-  const parse3DFile = useCallback(async (file: File): Promise<{ volume: number; dimensions: { x: number; y: number; z: number }; geometry: THREE.BufferGeometry }> => {
+  const parse3DFile = useCallback(async (file: File, unit: 'mm' | 'inch' = 'mm'): Promise<{ volume: number; dimensions: { x: number; y: number; z: number }; geometry: THREE.BufferGeometry }> => {
     return new Promise((resolve, reject) => {
       const fileExtension = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
       
@@ -148,7 +148,7 @@ const PrintingService = () => {
             geometry = loader.parse(contents);
             
             // Calculate volume and dimensions
-            const result = calculateVolumeAndDimensions(geometry);
+            const result = calculateVolumeAndDimensions(geometry, unit);
             resolve(result);
           } catch (error) {
             console.error('Error parsing STL file:', error);
@@ -175,7 +175,7 @@ const PrintingService = () => {
             
             if (foundGeometry) {
               geometry = foundGeometry;
-              const result = calculateVolumeAndDimensions(geometry);
+              const result = calculateVolumeAndDimensions(geometry, unit);
               resolve(result);
             } else {
               reject(new Error('No geometry found in OBJ file'));
@@ -206,7 +206,7 @@ const PrintingService = () => {
               
               if (foundGeometry) {
                 geometry = foundGeometry;
-                const result = calculateVolumeAndDimensions(geometry);
+                const result = calculateVolumeAndDimensions(geometry, unit);
                 resolve(result);
               } else {
                 reject(new Error('No geometry found in GLTF file'));
@@ -241,7 +241,7 @@ const PrintingService = () => {
               
               if (foundGeometry) {
                 geometry = foundGeometry;
-                const result = calculateVolumeAndDimensions(geometry);
+                const result = calculateVolumeAndDimensions(geometry, unit);
                 resolve(result);
               } else {
                 reject(new Error('No geometry found in FBX file'));
@@ -265,7 +265,7 @@ const PrintingService = () => {
             const loader = new PLYLoader();
             geometry = loader.parse(contents);
             
-            const result = calculateVolumeAndDimensions(geometry);
+            const result = calculateVolumeAndDimensions(geometry, unit);
             resolve(result);
           } catch (error) {
             console.error('Error parsing PLY file:', error);
@@ -281,8 +281,9 @@ const PrintingService = () => {
   }, []);
 
   // Helper function to calculate volume and dimensions from geometry
-  const calculateVolumeAndDimensions = (geometry: THREE.BufferGeometry): { volume: number; dimensions: { x: number; y: number; z: number }; geometry: THREE.BufferGeometry } => {
+  const calculateVolumeAndDimensions = (geometry: THREE.BufferGeometry, unit: 'mm' | 'inch' = 'mm'): { volume: number; dimensions: { x: number; y: number; z: number }; geometry: THREE.BufferGeometry } => {
     // Calculate volume using signed tetrahedron method (more accurate)
+    // Formula: V = Σ (1/6)(-x₃y₂z₁ + x₂y₃z₁ + x₃y₁z₂ - x₁y₃z₂ - x₂y₁z₃ + x₁y₂z₃)
     const positions = geometry.attributes.position.array as Float32Array;
     const triangles = positions.length / 9;
     let volume = 0;
@@ -297,27 +298,54 @@ const PrintingService = () => {
     
     volume = Math.abs(volume);
     
-    // Convert from mm³ to cm³
-    const volumeInCm3 = volume / 1000;
-    
     // Calculate bounding box dimensions
+    // Formula: Dim_x = Max(X) - Min(X), same for Y and Z
     geometry.computeBoundingBox();
     const boundingBox = geometry.boundingBox;
     const size = new THREE.Vector3();
     boundingBox.getSize(size);
     
-    // Convert from mm to cm
-    const dimensions = {
-      x: size.x / 10,
-      y: size.y / 10,
-      z: size.z / 10,
-    };
+    console.log('calculateVolumeAndDimensions - Unit selected:', unit);
+    console.log('Raw bounding box size (from geometry):', size);
+    console.log('Raw volume (from geometry):', volume);
+    console.log('Number of triangles:', triangles);
     
-    return { volume: volumeInCm3, dimensions, geometry };
+    // Apply unit conversion to get final values in cm
+    let finalVolumeCm3: number;
+    let finalDimensionsCm: { x: number; y: number; z: number };
+    
+    if (unit === 'inch') {
+      // Convert inches to cm: 1 inch = 2.54 cm
+      const cmPerInch = 2.54;
+      finalDimensionsCm = {
+        x: size.x * cmPerInch,
+        y: size.y * cmPerInch,
+        z: size.z * cmPerInch,
+      };
+      // Volume conversion: in³ to cm³ (multiply by 2.54³ = 16.387064)
+      finalVolumeCm3 = volume * 16.387064;
+      console.log('Conversion applied (inch to cm):');
+      console.log('  Dimensions:', size, 'inches ->', finalDimensionsCm, 'cm');
+      console.log('  Volume:', volume, 'in³ ->', finalVolumeCm3, 'cm³');
+    } else {
+      // Convert mm to cm: 1 cm = 10 mm
+      finalDimensionsCm = {
+        x: size.x / 10,
+        y: size.y / 10,
+        z: size.z / 10,
+      };
+      // Volume conversion: mm³ to cm³ (divide by 1000)
+      finalVolumeCm3 = volume / 1000;
+      console.log('Conversion applied (mm to cm):');
+      console.log('  Dimensions:', size, 'mm ->', finalDimensionsCm, 'cm');
+      console.log('  Volume:', volume, 'mm³ ->', finalVolumeCm3, 'cm³');
+    }
+    
+    return { volume: finalVolumeCm3, dimensions: finalDimensionsCm, geometry };
   };
 
   // Estimate print time based on volume and settings (more accurate)
-  const estimatePrintTime = useCallback((volumeCm3: number, dimensions: { x: number; y: number; z: number }): string => {
+  const estimatePrintTime = useCallback((volume: number, dimensions: { x: number; y: number; z: number }, unit: 'mm' | 'inch' = 'mm'): string => {
     // More accurate print time estimation based on:
     // - Volume
     // - Layer height (from printer selection)
@@ -335,16 +363,30 @@ const PrintingService = () => {
     const infillPercentage = settings.infill / 100;
     const supportsMultiplier = settings.supports ? 1.2 : 1.0;
     
+    // Convert dimensions from cm to mm for print time calculations
+    const dimensionsInMm = {
+      x: dimensions.x * 10,
+      y: dimensions.y * 10,
+      z: dimensions.z * 10,
+    };
+    
+    console.log('Print time calculation - Unit:', unit);
+    console.log('Dimensions (in cm):', dimensions);
+    console.log('Dimensions (in mm):', dimensionsInMm);
+    console.log('Layer height:', layerHeight, 'mm');
+    console.log('Print speed:', printSpeed, 'mm/s');
+    console.log('Infill:', infillPercentage * 100, '%');
+    
     // Calculate number of layers
-    const layerCount = Math.ceil((dimensions.z * 10) / layerHeight); // Convert cm to mm
+    const layerCount = Math.ceil(dimensionsInMm.z / layerHeight);
+    console.log('Layer count:', layerCount);
     
     // Calculate print time per layer based on cross-sectional area
-    const crossSectionalArea = dimensions.x * dimensions.y; // cm²
-    const printAreaPerLayer = crossSectionalArea * infillPercentage; // cm²
-    const printAreaPerLayerMm2 = printAreaPerLayer * 100; // mm²
+    const crossSectionalArea = dimensionsInMm.x * dimensionsInMm.y; // mm²
+    const printAreaPerLayer = crossSectionalArea * infillPercentage; // mm²
     
     // Time per layer = area / speed
-    const timePerLayer = printAreaPerLayerMm2 / printSpeed; // seconds
+    const timePerLayer = printAreaPerLayer / printSpeed; // seconds
     
     // Total print time = layers * time per layer * supports multiplier
     const totalSeconds = layerCount * timePerLayer * supportsMultiplier;
@@ -434,18 +476,23 @@ const PrintingService = () => {
 
       try {
         // Parse the 3D file to get actual volume and dimensions
-        const { volume, dimensions, geometry } = await parse3DFile(file);
+        const { volume, dimensions, geometry } = await parse3DFile(file, fileUnit);
         
         console.log('File parsed successfully:', file.name);
         console.log('Geometry:', geometry);
         console.log('Geometry vertices:', geometry?.attributes?.position?.count);
+        console.log('File unit:', fileUnit);
         
         // Calculate estimated weight based on volume and material density
+        // Volume is now in cm³ (converted if needed)
+        // Formula: Weight (grams) = Volume in cm³ × Density (g/cm³)
         const materialDensity = selectedMaterial?.pricePerGram ? 1.24 : 1.24; // PLA density ~1.24 g/cm³
         const estimatedWeight = volume * materialDensity;
         
-        // Estimate print time
-        const printTime = estimatePrintTime(volume, dimensions);
+        console.log('Weight calculation:', volume, 'cm³ ×', materialDensity, 'g/cm³ =', estimatedWeight, 'g');
+        
+        // Estimate print time (dimensions are now in cm)
+        const printTime = estimatePrintTime(volume, dimensions, fileUnit);
 
         newFiles.push({
           id: Math.random().toString(36).substr(2, 9),
@@ -488,7 +535,7 @@ const PrintingService = () => {
       
       toast.success(`${newFiles.length} file(s) uploaded successfully`);
     }
-  }, [selectedMaterial, parse3DFile, estimatePrintTime]);
+  }, [selectedMaterial, parse3DFile, estimatePrintTime, fileUnit]);
 
   // Recalculate print time when settings change
   useEffect(() => {
@@ -497,13 +544,13 @@ const PrintingService = () => {
         if (file.volume && file.dimensions) {
           return {
             ...file,
-            printTime: estimatePrintTime(file.volume, file.dimensions)
+            printTime: estimatePrintTime(file.volume, file.dimensions, fileUnit)
           };
         }
         return file;
       }));
     }
-  }, [settings.printer, settings.infill, settings.supports, estimatePrintTime, uploadedFiles.length]);
+  }, [settings.printer, settings.infill, settings.supports, estimatePrintTime, uploadedFiles.length, fileUnit]);
 
   // Update model color when color changes
   useEffect(() => {
@@ -715,7 +762,7 @@ const PrintingService = () => {
                           src="/3d-viewer.html"
                           className="w-full h-[500px]"
                           title="3D Model Viewer"
-                          sandbox="allow-scripts allow-same-origin"
+                          sandbox="allow-scripts"
                         />
                       </div>
                     )}
