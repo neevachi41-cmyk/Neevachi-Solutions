@@ -127,6 +127,10 @@ export const contactAPI = {
     const response = await api.get('/contact', { params });
     return response.data;
   },
+  deleteContact: async (id: string) => {
+    const response = await api.delete(`/contact/${id}`);
+    return response.data;
+  },
 };
 
 // Slider Updates API

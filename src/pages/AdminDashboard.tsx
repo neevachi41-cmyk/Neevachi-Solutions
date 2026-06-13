@@ -9,10 +9,19 @@ export default function Dashboard() {
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <Link to="/admin/slider-updates">Manage Slider Updates</Link>
+            <Link to="/admin/slider-updates">Slider Updates</Link>
           </Button>
-          <Button asChild>
-            <Link to="/admin/services/new">Add New Service</Link>
+          <Button variant="outline" asChild>
+            <Link to="/admin/services">Services</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/admin/users">Users</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/admin/blog">Blog Posts</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/admin/contact">Contact</Link>
           </Button>
         </div>
       </div>

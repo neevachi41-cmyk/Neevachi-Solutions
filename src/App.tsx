@@ -34,6 +34,10 @@ import Shop from './pages/Shop';
 import Workflow from './pages/Workflow';
 import AdminDashboard from './pages/AdminDashboard';
 import SliderUpdatesAdmin from './pages/SliderUpdatesAdmin';
+import ServicesAdmin from './pages/ServicesAdmin';
+import UsersAdmin from './pages/UsersAdmin';
+import BlogAdmin from './pages/BlogAdmin';
+import ContactAdmin from './pages/ContactAdmin';
 import Unauthorized from './pages/Unauthorized';
 
 const queryClient = new QueryClient();
@@ -70,16 +74,12 @@ const App: React.FC = () => {
                   <Route path="/request-custom-product" element={<RequestCustomProduct />} />
                   
                   {/* Protected routes */}
-                  <Route path="/admin" element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin/slider-updates" element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <SliderUpdatesAdmin />
-                    </ProtectedRoute>
-                  } />
+                  <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+                  <Route path="/admin/slider-updates" element={<ProtectedRoute allowedRoles={['admin']}><SliderUpdatesAdmin /></ProtectedRoute>} />
+                  <Route path="/admin/services" element={<ProtectedRoute allowedRoles={['admin']}><ServicesAdmin /></ProtectedRoute>} />
+                  <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><UsersAdmin /></ProtectedRoute>} />
+                  <Route path="/admin/blog" element={<ProtectedRoute allowedRoles={['admin']}><BlogAdmin /></ProtectedRoute>} />
+                  <Route path="/admin/contact" element={<ProtectedRoute allowedRoles={['admin']}><ContactAdmin /></ProtectedRoute>} />
                   
                   <Route path="*" element={<NotFound />} />
                 </Route>
