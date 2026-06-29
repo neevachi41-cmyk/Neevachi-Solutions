@@ -24,7 +24,10 @@ api.interceptors.request.use(
   }
 );
 
-// Auth API
+// ============================================
+// API CONNECTION: Authentication Endpoints
+// Backend: /auth/login, /auth/register, /auth/me
+// ============================================
 export const authAPI = {
   login: async (email: string, password: string) => {
     const response = await api.post('/auth/login', { email, password });
@@ -45,7 +48,10 @@ export const authAPI = {
   },
 };
 
-// Services API
+// ============================================
+// API CONNECTION: Services Management Endpoints
+// Backend: /admin/services
+// ============================================
 export const servicesAPI = {
   getServices: async (params = {}) => {
     const response = await api.get('/admin/services', { params });
@@ -69,7 +75,10 @@ export const servicesAPI = {
   },
 };
 
-// Users API
+// ============================================
+// API CONNECTION: Users Management Endpoints
+// Backend: /admin/users
+// ============================================
 export const usersAPI = {
   getUsers: async (params = {}) => {
     const response = await api.get('/admin/users', { params });
@@ -93,7 +102,10 @@ export const usersAPI = {
   },
 };
 
-// Blog Posts API
+// ============================================
+// API CONNECTION: Blog Posts Management Endpoints
+// Backend: /admin/posts
+// ============================================
 export const blogAPI = {
   getPosts: async (params = {}) => {
     const response = await api.get('/admin/posts', { params });
@@ -117,7 +129,10 @@ export const blogAPI = {
   },
 };
 
-// Contact API
+// ============================================
+// API CONNECTION: Contact Form Endpoints
+// Backend: /contact
+// ============================================
 export const contactAPI = {
   submitContact: async (data: { name: string; email: string; message: string }) => {
     const response = await api.post('/contact', data);
@@ -133,7 +148,10 @@ export const contactAPI = {
   },
 };
 
-// Slider Updates API
+// ============================================
+// API CONNECTION: Slider Updates Management Endpoints
+// Backend: /slider-updates
+// ============================================
 export const sliderUpdatesAPI = {
   getSliderUpdates: async (params = {}) => {
     const response = await api.get('/slider-updates/admin/all', { params });

@@ -1,3 +1,8 @@
+// ============================================
+// API CONNECTION: Slider Updates Management
+// Backend: /slider-updates
+// ============================================
+import { sliderUpdatesAPI } from '@/lib/api/admin';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Trash2, Edit, Plus, Trophy, Users, Building, Settings, Award } from 'lucide-react';
-import { sliderUpdatesAPI } from '@/lib/api/admin';
 
 const iconOptions = [
   { value: 'Trophy', label: 'Trophy', icon: Trophy },

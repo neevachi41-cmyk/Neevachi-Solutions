@@ -1,3 +1,8 @@
+// ============================================
+// API CONNECTION: User Registration
+// Backend: /auth/register
+// ============================================
+import { authAPI } from '@/lib/api/admin';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
@@ -5,7 +10,6 @@ import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { authAPI } from '@/lib/api/admin';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

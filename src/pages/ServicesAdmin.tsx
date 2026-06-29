@@ -1,3 +1,8 @@
+// ============================================
+// API CONNECTION: Services Management
+// Backend: /admin/services
+// ============================================
+import { servicesAPI } from '@/lib/api/admin';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Trash2, Edit, Plus } from 'lucide-react';
-import { servicesAPI } from '@/lib/api/admin';
 
 export default function ServicesAdmin() {
   const [services, setServices] = useState([]);

@@ -1,8 +1,12 @@
+// ============================================
+// API CONNECTION: Contact Form Submission
+// Backend: /contact
+// ============================================
+import { contactAPI } from '@/lib/api/admin';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
-import { contactAPI } from '@/lib/api/admin';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

@@ -1,4 +1,5 @@
 import express from 'express';
+import { ObjectId } from 'mongodb';
 import SliderUpdate from '../models/SliderUpdate.js';
 
 const router = express.Router();
@@ -6,8 +7,7 @@ const router = express.Router();
 // Get all slider updates (public endpoint)
 router.get('/', async (req, res) => {
   try {
-    const updates = await SliderUpdate.find({ isActive: true })
-      .sort({ order: 1, createdAt: -1 });
+    const updates = await SliderUpdate.getActiveSliderUpdates();
     res.json(updates);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching slider updates', error: error.message });
@@ -17,8 +17,7 @@ router.get('/', async (req, res) => {
 // Get all slider updates (admin endpoint - includes inactive)
 router.get('/admin/all', async (req, res) => {
   try {
-    const updates = await SliderUpdate.find()
-      .sort({ order: 1, createdAt: -1 });
+    const updates = await SliderUpdate.getAllSliderUpdates();
     res.json(updates);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching slider updates', error: error.message });
@@ -28,7 +27,7 @@ router.get('/admin/all', async (req, res) => {
 // Get single slider update
 router.get('/:id', async (req, res) => {
   try {
-    const update = await SliderUpdate.findById(req.params.id);
+    const update = await SliderUpdate.getSliderUpdateById(new ObjectId(req.params.id));
     if (!update) {
       return res.status(404).json({ message: 'Slider update not found' });
     }
@@ -41,8 +40,7 @@ router.get('/:id', async (req, res) => {
 // Create new slider update
 router.post('/', async (req, res) => {
   try {
-    const update = new SliderUpdate(req.body);
-    const savedUpdate = await update.save();
+    const savedUpdate = await SliderUpdate.createSliderUpdate(req.body);
     res.status(201).json(savedUpdate);
   } catch (error) {
     res.status(400).json({ message: 'Error creating slider update', error: error.message });
@@ -52,11 +50,7 @@ router.post('/', async (req, res) => {
 // Update slider update
 router.put('/:id', async (req, res) => {
   try {
-    const update = await SliderUpdate.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const update = await SliderUpdate.updateSliderUpdate(new ObjectId(req.params.id), req.body);
     if (!update) {
       return res.status(404).json({ message: 'Slider update not found' });
     }
@@ -69,8 +63,8 @@ router.put('/:id', async (req, res) => {
 // Delete slider update
 router.delete('/:id', async (req, res) => {
   try {
-    const update = await SliderUpdate.findByIdAndDelete(req.params.id);
-    if (!update) {
+    const deleted = await SliderUpdate.deleteSliderUpdate(new ObjectId(req.params.id));
+    if (!deleted) {
       return res.status(404).json({ message: 'Slider update not found' });
     }
     res.json({ message: 'Slider update deleted successfully' });
@@ -82,13 +76,14 @@ router.delete('/:id', async (req, res) => {
 // Toggle active status
 router.patch('/:id/toggle', async (req, res) => {
   try {
-    const update = await SliderUpdate.findById(req.params.id);
+    const update = await SliderUpdate.getSliderUpdateById(new ObjectId(req.params.id));
     if (!update) {
       return res.status(404).json({ message: 'Slider update not found' });
     }
-    update.isActive = !update.isActive;
-    await update.save();
-    res.json(update);
+    const updated = await SliderUpdate.updateSliderUpdate(new ObjectId(req.params.id), {
+      isActive: !update.isActive
+    });
+    res.json(updated);
   } catch (error) {
     res.status(500).json({ message: 'Error toggling slider update', error: error.message });
   }

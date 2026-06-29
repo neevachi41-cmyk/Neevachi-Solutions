@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
     }
     
     // Save to MongoDB
-    const newContact = await Contact.create({ name, email, message });
+    const newContact = await Contact.createContact({ name, email, message });
     
     res.status(201).json({ 
       message: 'Contact form submitted successfully',
@@ -29,7 +29,7 @@ router.post('/', async (req, res) => {
 // Get all contacts (protected route, would require authentication in a real app)
 router.get('/', async (req, res) => {
   try {
-    const contacts = await Contact.find().sort({ createdAt: -1 });
+    const contacts = await Contact.getAllContacts();
     res.json(contacts);
   } catch (error) {
     console.error('Get contacts error:', error);

@@ -1,7 +1,11 @@
+// ============================================
+// API CONNECTION: Authentication
+// Backend: /auth/login, /auth/register, /auth/me
+// ============================================
+import { authAPI } from '@/lib/api/admin';
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { authAPI } from '@/lib/api/admin';
 
 export interface User {
   id: string;

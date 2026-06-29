@@ -9,14 +9,8 @@ router.post('/register', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-    
-    // Create new user (password will be hashed by the pre-save hook)
-    const user = await User.create({ email, password });
+    // Create new user (password will be hashed by the model)
+    const user = await User.createUser({ email, password });
     
     // Create token
     if (!process.env.JWT_SECRET) {
@@ -31,6 +25,9 @@ router.post('/register', async (req, res) => {
     res.status(201).json({ message: 'User registered', token, user: { id: user._id, email: user.email, role: user.role } });
   } catch (error) {
     console.error('Register error:', error);
+    if (error.message === 'User already exists') {
+      return res.status(400).json({ message: 'User already exists' });
+    }
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
@@ -40,17 +37,10 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // Find user
-    const user = await User.findOne({ email });
+    // Verify user credentials
+    const user = await User.verifyUser(email, password);
     
-    // Check if user exists
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-    
-    // Check password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
@@ -82,13 +72,13 @@ router.post('/create-admin', async (req, res) => {
     }
     
     // Check if admin already exists
-    const existingAdmin = await User.findOne({ email });
+    const existingAdmin = await User.findUserByEmail(email);
     if (existingAdmin) {
       return res.status(400).json({ message: 'Admin user already exists' });
     }
     
     // Create admin user
-    const admin = await User.create({
+    const admin = await User.createUser({
       email,
       password,
       role: 'admin'
@@ -100,6 +90,9 @@ router.post('/create-admin', async (req, res) => {
     });
   } catch (error) {
     console.error('Create admin error:', error);
+    if (error.message === 'User already exists') {
+      return res.status(400).json({ message: 'Admin user already exists' });
+    }
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });

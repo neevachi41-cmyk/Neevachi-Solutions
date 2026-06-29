@@ -1,8 +1,12 @@
+// ============================================
+// API CONNECTION: Contact Form Management
+// Backend: /contact
+// ============================================
+import { contactAPI } from '@/lib/api/admin';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Mail, Phone, Trash2, Calendar } from 'lucide-react';
-import { contactAPI } from '@/lib/api/admin';
 
 export default function ContactAdmin() {
   const [contacts, setContacts] = useState([]);
