@@ -2,7 +2,7 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/neevachi';
+const uri = "mongodb+srv://neevachi41_db_user:<db_password>@cluster0.qjxbfpz.mongodb.net/?appName=Cluster0";
 
 const client = new MongoClient(uri, {
   serverApi: {
