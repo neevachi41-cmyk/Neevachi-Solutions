@@ -1,3 +1,7 @@
+// ============================================
+// API CONNECTION: Slider Updates
+// Backend: /slider-updates
+// ============================================
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';

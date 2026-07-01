@@ -1,15 +1,15 @@
 services:
   - type: web
-    name: neevachi-api
+    name: neevachi-backend
     env: node
     buildCommand: cd api && npm install
     startCommand: cd api && npm start
     envVars:
       - key: MONGODB_URI
-        sync: false
+        value: mongodb+srv://neevachi41_db_user:Pranit19702006@cluster0.l3whoaz.mongodb.net/?appName=Cluster0
       - key: JWT_SECRET
-        sync: false
-      - key: PORT
-        value: 5000
+        generateValue: true
       - key: CORS_ORIGIN
         value: https://neevachi-solutions.vercel.app
+      - key: PORT
+        value: 10000

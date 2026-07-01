@@ -8,8 +8,8 @@ const createContact = async (contactData) => {
   const { name, email, message } = contactData;
   
   const contact = {
-    name: name.trim(),
-    email: email.toLowerCase().trim(),
+    name,
+    email,
     message,
     createdAt: new Date()
   };
@@ -18,32 +18,18 @@ const createContact = async (contactData) => {
   
   return {
     _id: result.insertedId,
-    name: contact.name,
-    email: contact.email,
-    message: contact.message,
-    createdAt: contact.createdAt
+    ...contact
   };
 };
 
 // Get all contacts
 const getAllContacts = async () => {
   const db = getDB();
-  const contacts = await db.collection(COLLECTION_NAME)
-    .find({})
-    .sort({ createdAt: -1 })
-    .toArray();
+  const contacts = await db.collection(COLLECTION_NAME).find({}).sort({ createdAt: -1 }).toArray();
   return contacts;
-};
-
-// Get contact by ID
-const getContactById = async (contactId) => {
-  const db = getDB();
-  const contact = await db.collection(COLLECTION_NAME).findOne({ _id: contactId });
-  return contact;
 };
 
 export default {
   createContact,
-  getAllContacts,
-  getContactById
+  getAllContacts
 };

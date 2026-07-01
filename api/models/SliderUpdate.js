@@ -2,30 +2,14 @@ import { getDB } from '../lib/db.js';
 
 const COLLECTION_NAME = 'sliderUpdates';
 
-const VALID_ICONS = ['Trophy', 'Users', 'Building', 'Settings', 'Award'];
-
 // Create a new slider update
 const createSliderUpdate = async (sliderData) => {
   const db = getDB();
-  const { title, teamName, position, schoolName, category, image, icon, isActive = true, order = 0 } = sliderData;
-  
-  // Validate icon
-  if (!VALID_ICONS.includes(icon)) {
-    throw new Error(`Invalid icon. Must be one of: ${VALID_ICONS.join(', ')}`);
-  }
   
   const sliderUpdate = {
-    title: title.trim(),
-    teamName: teamName.trim(),
-    position: position.trim(),
-    schoolName: schoolName.trim(),
-    category: category.trim(),
-    image,
-    icon,
-    isActive,
-    order,
+    ...sliderData,
     createdAt: new Date(),
-    updatedAt: new Date()
+    isActive: sliderData.isActive !== undefined ? sliderData.isActive : true
   };
   
   const result = await db.collection(COLLECTION_NAME).insertOne(sliderUpdate);
@@ -36,70 +20,54 @@ const createSliderUpdate = async (sliderData) => {
   };
 };
 
-// Get all slider updates
-const getAllSliderUpdates = async () => {
-  const db = getDB();
-  const sliderUpdates = await db.collection(COLLECTION_NAME)
-    .find({})
-    .sort({ order: 1, createdAt: -1 })
-    .toArray();
-  return sliderUpdates;
-};
-
-// Get active slider updates
+// Get all active slider updates
 const getActiveSliderUpdates = async () => {
   const db = getDB();
-  const sliderUpdates = await db.collection(COLLECTION_NAME)
-    .find({ isActive: true })
-    .sort({ order: 1, createdAt: -1 })
-    .toArray();
-  return sliderUpdates;
+  const updates = await db.collection(COLLECTION_NAME).find({ isActive: true }).sort({ createdAt: -1 }).toArray();
+  return updates;
+};
+
+// Get all slider updates (including inactive)
+const getAllSliderUpdates = async () => {
+  const db = getDB();
+  const updates = await db.collection(COLLECTION_NAME).find({}).sort({ createdAt: -1 }).toArray();
+  return updates;
 };
 
 // Get slider update by ID
-const getSliderUpdateById = async (sliderId) => {
+const getSliderUpdateById = async (id) => {
   const db = getDB();
-  const sliderUpdate = await db.collection(COLLECTION_NAME).findOne({ _id: sliderId });
-  return sliderUpdate;
+  const update = await db.collection(COLLECTION_NAME).findOne({ _id: id });
+  return update;
 };
 
 // Update slider update
-const updateSliderUpdate = async (sliderId, updateData) => {
+const updateSliderUpdate = async (id, updateData) => {
   const db = getDB();
-  
-  // Validate icon if provided
-  if (updateData.icon && !VALID_ICONS.includes(updateData.icon)) {
-    throw new Error(`Invalid icon. Must be one of: ${VALID_ICONS.join(', ')}`);
-  }
-  
-  const updateDoc = {
-    ...updateData,
-    updatedAt: new Date()
-  };
-  
   const result = await db.collection(COLLECTION_NAME).updateOne(
-    { _id: sliderId },
-    { $set: updateDoc }
+    { _id: id },
+    { $set: updateData }
   );
   
   if (result.matchedCount === 0) {
     return null;
   }
   
-  return await getSliderUpdateById(sliderId);
+  return await getSliderUpdateById(id);
 };
 
 // Delete slider update
-const deleteSliderUpdate = async (sliderId) => {
+const deleteSliderUpdate = async (id) => {
   const db = getDB();
-  const result = await db.collection(COLLECTION_NAME).deleteOne({ _id: sliderId });
+  const result = await db.collection(COLLECTION_NAME).deleteOne({ _id: id });
+  
   return result.deletedCount > 0;
 };
 
 export default {
   createSliderUpdate,
-  getAllSliderUpdates,
   getActiveSliderUpdates,
+  getAllSliderUpdates,
   getSliderUpdateById,
   updateSliderUpdate,
   deleteSliderUpdate

@@ -11,6 +11,9 @@ import dbConnect from './lib/db.js';
 import authRoutes from './routes/auth.js';
 import contactRoutes from './routes/contact.js';
 import sliderUpdateRoutes from './routes/sliderUpdates.js';
+import usersRoutes from './routes/users.js';
+import servicesRoutes from './routes/services.js';
+import postsRoutes from './routes/posts.js';
 
 // Configure __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -57,6 +60,9 @@ dbConnect();
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/slider-updates', sliderUpdateRoutes);
+app.use('/api/admin/users', usersRoutes);
+app.use('/api/admin/services', servicesRoutes);
+app.use('/api/admin/posts', postsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -77,7 +83,7 @@ if (fs.existsSync(distPath)) {
   app.get('/', (req, res) => {
     res.json({ 
       message: 'Backend API is running', 
-      endpoints: ['/api/health', '/api/auth', '/api/contact'],
+      endpoints: ['/api/health', '/api/auth', '/api/contact', '/api/slider-updates', '/api/admin/users', '/api/admin/services', '/api/admin/posts'],
       note: 'Frontend not built yet. Build frontend to serve full application.'
     });
   });
