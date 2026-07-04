@@ -34,6 +34,8 @@ const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
 app.use(cors({
   origin: corsOrigin,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // Rate limiting
@@ -52,9 +54,6 @@ const authLimiter = rateLimit({
 });
 
 app.use(express.json());
-
-// Connect to MongoDB
-dbConnect();
 
 // API Routes
 app.use('/api/auth', authLimiter, authRoutes);
@@ -90,12 +89,19 @@ if (fs.existsSync(distPath)) {
 }
 
 // Start the server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`MongoDB Connected: ${process.env.MONGO_URI || 'localhost'}`);
-  console.log(`Open http://localhost:${PORT} to view the application`);
-  console.log(`Or access it from your network at: http://${getLocalIpAddress()}:${PORT}`);
-});
+const startServer = async () => {
+  // Connect to MongoDB
+  await dbConnect();
+  
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`MongoDB Connected: ${process.env.MONGODB_URI || 'localhost'}`);
+    console.log(`Open http://localhost:${PORT} to view the application`);
+    console.log(`Or access it from your network at: http://${getLocalIpAddress()}:${PORT}`);
+  });
+};
+
+startServer();
 
 // Function to get local IP address
 function getLocalIpAddress() {
