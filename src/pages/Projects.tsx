@@ -1,93 +1,12 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import ProjectCard from '@/components/ProjectCard';
 
 import { ArrowRight, Award, Clock, Users, Zap, CheckCircle } from 'lucide-react';
-
-const projects = [
-  {
-    id: "1",
-    title: "Automated Warehouse Robot",
-    category: "Automotive",
-    year: "2024",
-    description: "Autonomous mobile robot for warehouse automation",
-    image: "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=800&auto=format&fit=crop&q=80",
-    technologies: ["ROS", "Python", "Computer Vision"],
-    status: "Completed"
-  },
-  {
-    id: "2",
-    title: "Smart Agriculture System",
-    category: "Agriculture",
-    year: "2024",
-    description: "IoT-based crop monitoring and irrigation control",
-    image: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=800&auto=format&fit=crop&q=80",
-    technologies: ["IoT", "Sensors", "Cloud"],
-    status: "Completed"
-  },
-  {
-    id: "3",
-    title: "E-commerce Platform",
-    category: "Web Development",
-    year: "2023",
-    description: "Custom e-commerce solution with payment integration",
-    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&auto=format&fit=crop&q=80",
-    technologies: ["React", "Node.js", "MongoDB"],
-    status: "Completed"
-  },
-  {
-    id: "4",
-    title: "Mobile Banking App",
-    category: "Finance",
-    year: "2023",
-    description: "Secure mobile banking application with biometric authentication",
-    image: "https://images.unsplash.com/photo-1554224155-3a58922a22c3?w=800&auto=format&fit=crop&q=80",
-    technologies: ["React Native", "Firebase", "Security"],
-    status: "Completed"
-  },
-  {
-    id: "5",
-    title: "Industrial Automation System",
-    category: "Manufacturing",
-    year: "2024",
-    description: "PLC-based automation for production line optimization",
-    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=80",
-    technologies: ["PLC", "SCADA", "Industrial IoT"],
-    status: "In Progress"
-  },
-  {
-    id: "6",
-    title: "Healthcare Monitoring Device",
-    category: "Healthcare",
-    year: "2024",
-    description: "Wearable health monitoring system with real-time alerts",
-    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80",
-    technologies: ["Embedded Systems", "Sensors", "Mobile App"],
-    status: "In Progress"
-  },
-  {
-    id: "7",
-    title: "Smart Home Integration",
-    category: "IoT",
-    year: "2023",
-    description: "Complete home automation system with voice control",
-    image: "https://images.unsplash.com/photo-1558002038-1091a1661116?w=800&auto=format&fit=crop&q=80",
-    technologies: ["IoT", "Alexa", "Home Automation"],
-    status: "Completed"
-  },
-  {
-    id: "8",
-    title: "Robotics Arm Controller",
-    category: "Robotics",
-    year: "2023",
-    description: "6-axis robotic arm controller for precision manufacturing",
-    image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&auto=format&fit=crop&q=80",
-    technologies: ["ROS", "Python", "Motion Control"],
-    status: "Completed"
-  },
-];
+import { projectsAPI } from '@/lib/api/admin';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -109,6 +28,23 @@ const itemVariants = {
 };
 
 const Projects = () => {
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await projectsAPI.getProjects();
+        setProjects(data);
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -148,26 +84,32 @@ const Projects = () => {
           </p>
         </motion.div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
-        >
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              variants={itemVariants}
-            >
-              <ProjectCard 
-                project={project}
-                layout="grid"
-                className="h-full"
-              />
-            </motion.div>
-          ))}
-        </motion.div>
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Loading projects...</p>
+          </div>
+        ) : (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
+          >
+            {projects.map((project, index) => (
+              <motion.div
+                key={project._id}
+                variants={itemVariants}
+              >
+                <ProjectCard 
+                  project={project}
+                  layout="grid"
+                  className="h-full"
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

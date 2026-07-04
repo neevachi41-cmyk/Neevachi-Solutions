@@ -182,4 +182,31 @@ export const sliderUpdatesAPI = {
   },
 };
 
+// ============================================
+// API CONNECTION: Projects Management Endpoints
+// Backend: /admin/projects
+// ============================================
+export const projectsAPI = {
+  getProjects: async (params = {}) => {
+    const response = await api.get('/admin/projects', { params });
+    return response.data;
+  },
+  getProject: async (id: string) => {
+    const response = await api.get(`/admin/projects/${id}`);
+    return response.data;
+  },
+  createProject: async (data: unknown) => {
+    const response = await api.post('/admin/projects', data);
+    return response.data;
+  },
+  updateProject: async (id: string, data: unknown) => {
+    const response = await api.put(`/admin/projects/${id}`, data);
+    return response.data;
+  },
+  deleteProject: async (id: string) => {
+    const response = await api.delete(`/admin/projects/${id}`);
+    return response.data;
+  },
+};
+
 export default api;

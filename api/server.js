@@ -16,6 +16,7 @@ import sliderUpdateRoutes from './routes/sliderUpdates.js';
 import usersRoutes from './routes/users.js';
 import servicesRoutes from './routes/services.js';
 import postsRoutes from './routes/posts.js';
+import projectsRoutes from './routes/projects.js';
 
 // Configure __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -79,6 +80,7 @@ app.use('/api/slider-updates', sliderUpdateRoutes);
 app.use('/api/admin/users', usersRoutes);
 app.use('/api/admin/services', servicesRoutes);
 app.use('/api/admin/posts', postsRoutes);
+app.use('/api/admin/projects', projectsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

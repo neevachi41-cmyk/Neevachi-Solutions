@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -9,68 +9,33 @@ import ProjectCard from '@/components/ProjectCard';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { ArrowLeft, Plus } from 'lucide-react';
-
-// This would typically come from an API
-const allProjects = [
-  {
-    id: "1",
-    title: "Automated Warehouse Robot",
-    category: "Automotive",
-    year: "2024",
-    description: "Autonomous mobile robot for warehouse automation",
-    image: "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=800&auto=format&fit=crop&q=80",
-  },
-  {
-    id: "2",
-    title: "Smart Agriculture System",
-    category: "Agriculture",
-    year: "2024",
-    description: "IoT-based crop monitoring and irrigation control",
-    image: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=800&auto=format&fit=crop&q=80",
-  },
-  {
-    id: "3",
-    title: "E-commerce Platform",
-    category: "Web Development",
-    year: "2023",
-    description: "Custom e-commerce solution with payment integration",
-    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&auto=format&fit=crop&q=80",
-  },
-  {
-    id: "4",
-    title: "Mobile Banking App",
-    category: "Finance",
-    year: "2023",
-    description: "Secure mobile banking application with biometric authentication",
-    image: "https://images.unsplash.com/photo-1554224155-3a58922a22c3?w=800&auto=format&fit=crop&q=80",
-  },
-  {
-    id: "5",
-    title: "Smart Home System",
-    category: "IoT",
-    year: "2024",
-    description: "Centralized control for home automation devices",
-    image: "https://images.unsplash.com/photo-1558002038-1055907df827?w=800&auto=format&fit=crop&q=80",
-  },
-  {
-    id: "6",
-    title: "Health Tracking App",
-    category: "Healthcare",
-    year: "2023",
-    description: "Mobile application for tracking health metrics and fitness goals",
-    image: "https://images.unsplash.com/photo-1505751172876-fa186e5a3f54?w=800&auto=format&fit=crop&q=80",
-  },
-];
+import { projectsAPI } from '@/lib/api/admin';
 
 const AllProjects = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const [allProjects, setAllProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
 
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await projectsAPI.getProjects();
+        setAllProjects(data);
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, []);
+
   const handleEditProject = (projectId: string) => {
-    const project = allProjects.find(p => p.id === projectId);
+    const project = allProjects.find(p => p._id === projectId);
     if (project) {
       setEditingProject(project);
       setIsEditDialogOpen(true);
@@ -133,23 +98,29 @@ const AllProjects = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {allProjects.map((project, index) => (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-              >
-                <ProjectCard 
-                  project={project}
-                  layout="grid"
-                  className="h-full"
-                  onEdit={isAdmin ? handleEditProject : undefined}
-                />
-              </motion.div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading projects...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {allProjects.map((project, index) => (
+                <motion.div
+                  key={project._id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                >
+                  <ProjectCard 
+                    project={project}
+                    layout="grid"
+                    className="h-full"
+                    onEdit={isAdmin ? handleEditProject : undefined}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
           <div className="mt-12 flex justify-center">

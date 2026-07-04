@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { ArrowLeft, FileText, Plus, Upload } from 'lucide-react';
+import { blogAPI } from '@/lib/api/admin';
 
 type BlogPost = {
-  id: string;
+  _id: string;
   title: string;
   content: string;
   image?: string;
@@ -25,14 +26,22 @@ export default function Blogs() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([
-    {
-      id: "1",
-      title: "Getting Started with Web Development",
-      content: "This is a sample blog post about getting started with web development...",
-      createdAt: "2025-01-01",
-    },
-  ]);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const data = await blogAPI.getPosts();
+        setBlogPosts(data);
+      } catch (error) {
+        console.error('Failed to fetch blog posts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPosts();
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -45,7 +54,7 @@ export default function Blogs() {
     if (!title || !content) return;
 
     const newPost: BlogPost = {
-      id: Date.now().toString(),
+      _id: Date.now().toString(),
       title,
       content,
       image: image ? URL.createObjectURL(image) : undefined,
@@ -128,36 +137,44 @@ export default function Blogs() {
         </TabsList>
 
         <TabsContent value="read" className="space-y-6">
-          {blogPosts.map((post) => (
-            <Card key={post.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
-                  <FileText className="w-4 h-4" />
-                  <span>Posted on {post.createdAt}</span>
-                </div>
-                <CardTitle className="text-2xl">{post.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground line-clamp-3">
-                  {post.content}
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  variant="link" 
-                  className="p-0 h-auto"
-                  onClick={() => handleViewPost(post)}
-                >
-                  Read more →
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-          
-          {blogPosts.length === 0 && (
+          {loading ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No blog posts yet. Be the first to write one!</p>
+              <p className="text-muted-foreground">Loading blog posts...</p>
             </div>
+          ) : (
+            <>
+              {blogPosts.map((post) => (
+                <Card key={post._id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
+                      <FileText className="w-4 h-4" />
+                      <span>Posted on {new Date(post.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <CardTitle className="text-2xl">{post.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground line-clamp-3">
+                      {post.content}
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      variant="link" 
+                      className="p-0 h-auto"
+                      onClick={() => handleViewPost(post)}
+                    >
+                      Read more →
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+              
+              {blogPosts.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No blog posts yet. Be the first to write one!</p>
+                </div>
+              )}
+            </>
           )}
         </TabsContent>
 
