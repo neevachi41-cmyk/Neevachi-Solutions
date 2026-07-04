@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const uri = "mongodb+srv://neevachi41_db_user:Pranit19702006@cluster0.l3whoaz.mongodb.net/?appName=Cluster0";
+const uri = process.env.MONGODB_URI || "mongodb+srv://neevachi41_db_user:Pranit19702006@cluster0.l3whoaz.mongodb.net/?appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
