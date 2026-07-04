@@ -1,35 +1,24 @@
-import { getDB } from '../lib/db.js';
+import mongoose from 'mongoose';
 
-const COLLECTION_NAME = 'contacts';
+const contactSchema = new mongoose.Schema({
+  name: { 
+    type: String, 
+    required: true 
+  },
+  email: { 
+    type: String, 
+    required: true 
+  },
+  message: { 
+    type: String, 
+    required: true 
+  },
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  }
+});
 
-// Create a new contact
-const createContact = async (contactData) => {
-  const db = getDB();
-  const { name, email, message } = contactData;
-  
-  const contact = {
-    name,
-    email,
-    message,
-    createdAt: new Date()
-  };
-  
-  const result = await db.collection(COLLECTION_NAME).insertOne(contact);
-  
-  return {
-    _id: result.insertedId,
-    ...contact
-  };
-};
+const Contact = mongoose.models.Contact || mongoose.model('Contact', contactSchema);
 
-// Get all contacts
-const getAllContacts = async () => {
-  const db = getDB();
-  const contacts = await db.collection(COLLECTION_NAME).find({}).sort({ createdAt: -1 }).toArray();
-  return contacts;
-};
-
-export default {
-  createContact,
-  getAllContacts
-};
+export default Contact;

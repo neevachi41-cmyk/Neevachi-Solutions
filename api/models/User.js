@@ -1,88 +1,88 @@
 import bcrypt from 'bcryptjs';
-import { getDB } from '../lib/db.js';
+import mongoose from 'mongoose';
 
-const COLLECTION_NAME = 'users';
+const userSchema = new mongoose.Schema({
+  name: { 
+    type: String, 
+    required: false,
+    trim: true
+  },
+  email: { 
+    type: String, 
+    required: true, 
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
+  password: { 
+    type: String, 
+    required: false 
+  },
+  role: { 
+    type: String, 
+    enum: ['user', 'admin'],
+    default: 'user' 
+  },
+  avatar: {
+    type: String
+  },
+  provider: {
+    type: String,
+    enum: ['local', 'google', 'facebook', 'twitter'],
+    default: 'local'
+  },
+  providerId: {
+    type: String
+  },
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  }
+});
 
-// Helper function to hash password
-const hashPassword = async (password) => {
-  const salt = await bcrypt.genSalt(10);
-  return await bcrypt.hash(password, salt);
-};
-
-// Helper function to compare password
-const comparePassword = async (candidatePassword, hashedPassword) => {
-  return await bcrypt.compare(candidatePassword, hashedPassword);
-};
-
-// Create a new user
-const createUser = async (userData) => {
-  const db = getDB();
-  const { email, password, role = 'user' } = userData;
-  
-  // Check if user already exists
-  const existingUser = await db.collection(COLLECTION_NAME).findOne({ email });
-  if (existingUser) {
-    throw new Error('User already exists');
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) {
+    if (typeof next === 'function') next();
+    return;
   }
   
-  // Hash password
-  const hashedPassword = await hashPassword(password);
-  
-  // Create user document
-  const user = {
-    email: email.toLowerCase().trim(),
-    password: hashedPassword,
-    role,
-    createdAt: new Date()
-  };
-  
-  const result = await db.collection(COLLECTION_NAME).insertOne(user);
-  
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    if (typeof next === 'function') next();
+  } catch (error) {
+    if (typeof next === 'function') next(error);
+    throw error;
+  }
+});
+
+// Method to compare password
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Method to get safe user data (without password)
+userSchema.methods.toSafeObject = function() {
   return {
-    _id: result.insertedId,
-    email: user.email,
-    role: user.role,
-    createdAt: user.createdAt
+    _id: this._id,
+    name: this.name,
+    email: this.email,
+    role: this.role,
+    avatar: this.avatar,
+    provider: this.provider,
+    createdAt: this.createdAt
   };
 };
 
-// Find user by email
-const findUserByEmail = async (email) => {
-  const db = getDB();
-  const user = await db.collection(COLLECTION_NAME).findOne({ email: email.toLowerCase().trim() });
-  return user;
-};
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
-// Find user by ID
-const findUserById = async (userId) => {
-  const db = getDB();
-  const user = await db.collection(COLLECTION_NAME).findOne({ _id: userId });
-  return user;
-};
+// Ensure hooks are registered if model already exists
+if (mongoose.models.User) {
+  delete mongoose.models.User;
+  delete mongoose.connection.models.User;
+}
 
-// Verify user credentials
-const verifyUser = async (email, password) => {
-  const user = await findUserByEmail(email);
-  if (!user) {
-    return null;
-  }
-  
-  const isMatch = await comparePassword(password, user.password);
-  if (!isMatch) {
-    return null;
-  }
-  
-  return {
-    _id: user._id,
-    email: user.email,
-    role: user.role,
-    createdAt: user.createdAt
-  };
-};
+const UserModel = mongoose.model('User', userSchema);
 
-export default {
-  createUser,
-  findUserByEmail,
-  findUserById,
-  verifyUser
-};
+export default UserModel;

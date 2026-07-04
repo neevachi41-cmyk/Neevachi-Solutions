@@ -1,49 +1,39 @@
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const uri = process.env.MONGODB_URI || "mongodb+srv://neevachi41_db_user:Pranit19702006@cluster0.l3whoaz.mongodb.net/?appName=Cluster0";
+const uri = process.env.MONGODB_URI;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
-});
+if (!uri) {
+  throw new Error('MONGODB_URI is not defined in your .env file');
+}
 
-let db = null;
+let isConnected = false;
 
 const connectDB = async () => {
+  if (isConnected) {
+    return mongoose.connection;
+  }
+
   try {
-    // Connect the client to the server
-    await client.connect();
-    
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    
-    // Set the database reference
-    db = client.db();
-    
-    return client;
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
+    await mongoose.connect(uri);
+    isConnected = true;
+    console.log('MongoDB Atlas connected via Mongoose');
+    return mongoose.connection;
+  } catch (err) {
+    console.error('Mongoose connection error:', err.message);
     console.error('Make sure MongoDB is running or check your MONGODB_URI in .env file');
     process.exit(1);
   }
 };
 
 const getDB = () => {
-  if (!db) {
+  if (!isConnected) {
     throw new Error('Database not connected. Call connectDB() first.');
   }
-  return db;
+  return mongoose.connection.db;
 };
 
-const getClient = () => client;
-
 export default connectDB;
-export { getDB, getClient };
+export { getDB };

@@ -51,7 +51,7 @@ const Register = () => {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      await authAPI.register(data.email, data.password);
+      await authAPI.register(data.email, data.password, data.name);
       toast.success('Registration successful! Please login.');
       navigate('/login');
     } catch (error) {

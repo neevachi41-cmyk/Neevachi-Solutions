@@ -1,5 +1,4 @@
 import express from 'express';
-import { ObjectId } from 'mongodb';
 import Service from '../models/Service.js';
 
 const router = express.Router();
@@ -7,7 +6,7 @@ const router = express.Router();
 // Get all active services (public)
 router.get('/', async (req, res) => {
   try {
-    const services = await Service.getActiveServices();
+    const services = await Service.find({ isActive: true }).sort({ order: 1 });
     res.json(services);
   } catch (error) {
     console.error('Get services error:', error);
@@ -18,7 +17,7 @@ router.get('/', async (req, res) => {
 // Get all services (admin - includes inactive)
 router.get('/admin/all', async (req, res) => {
   try {
-    const services = await Service.getAllServices();
+    const services = await Service.find({}).sort({ order: 1 });
     res.json(services);
   } catch (error) {
     console.error('Get all services error:', error);
@@ -29,7 +28,7 @@ router.get('/admin/all', async (req, res) => {
 // Get single service
 router.get('/:id', async (req, res) => {
   try {
-    const service = await Service.getServiceById(new ObjectId(req.params.id));
+    const service = await Service.findById(req.params.id);
     if (!service) {
       return res.status(404).json({ message: 'Service not found' });
     }
@@ -43,7 +42,7 @@ router.get('/:id', async (req, res) => {
 // Create new service
 router.post('/', async (req, res) => {
   try {
-    const savedService = await Service.createService(req.body);
+    const savedService = await Service.create(req.body);
     res.status(201).json(savedService);
   } catch (error) {
     console.error('Create service error:', error);
@@ -54,7 +53,11 @@ router.post('/', async (req, res) => {
 // Update service
 router.put('/:id', async (req, res) => {
   try {
-    const service = await Service.updateService(new ObjectId(req.params.id), req.body);
+    const service = await Service.findByIdAndUpdate(
+      req.params.id,
+  	  req.body,
+  	  { new: true }
+    );
     if (!service) {
       return res.status(404).json({ message: 'Service not found' });
     }
@@ -68,8 +71,8 @@ router.put('/:id', async (req, res) => {
 // Delete service
 router.delete('/:id', async (req, res) => {
   try {
-    const deleted = await Service.deleteService(new ObjectId(req.params.id));
-    if (!deleted) {
+    const service = await Service.findByIdAndDelete(req.params.id);
+    if (!service) {
       return res.status(404).json({ message: 'Service not found' });
     }
     res.json({ message: 'Service deleted successfully' });
