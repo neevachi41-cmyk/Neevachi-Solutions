@@ -615,24 +615,48 @@ const PrintingService = () => {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Order submitted:', {
-        files: uploadedFiles,
-        settings,
-        customerInfo,
-        totalPrice,
-      });
-      
+    try {
+      // Prepare files data (without geometry objects — not serializable)
+      const filesData = uploadedFiles.map(f => ({
+        name: f.name,
+        size: f.size,
+        volume: f.volume,
+        estimatedWeight: f.estimatedWeight,
+        printTime: f.printTime,
+        dimensions: f.dimensions,
+      }));
+
+      await import('@/lib/api/admin').then(({ printOrdersAPI }) =>
+        printOrdersAPI.submitOrder({
+          customerName: customerInfo.name,
+          customerEmail: customerInfo.email,
+          customerPhone: customerInfo.phone,
+          customerAddress: customerInfo.address,
+          notes: customerInfo.notes,
+          printer: settings.printer,
+          material: settings.material,
+          color: settings.color,
+          infill: settings.infill,
+          quantity: settings.quantity,
+          supports: settings.supports,
+          postProcessing: settings.postProcessing,
+          files: filesData,
+          totalPrice,
+        })
+      );
+
       toast.success('Order submitted successfully! We will contact you shortly.');
-      setIsSubmitting(false);
-      
+
       // Reset form
       setUploadedFiles([]);
       setCustomerInfo({ name: '', email: '', phone: '', address: '', notes: '' });
       setCurrentStep(0);
       setExpandedSection('printer');
-    }, 2000);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to submit order. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleNextStep = () => {

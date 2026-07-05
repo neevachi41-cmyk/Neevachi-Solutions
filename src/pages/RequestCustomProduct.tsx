@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
-import { ArrowLeft, Check, Plus, X } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, Plus } from 'lucide-react';
+import { customRequestsAPI } from '@/lib/api/admin';
 
 export default function RequestCustomProduct() {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     productType: '',
     description: '',
@@ -17,17 +20,20 @@ export default function RequestCustomProduct() {
     contactPhone: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would send this to your backend
-    console.log('Custom product request:', formData);
-    
-    // Show success message
-    alert('Custom product request received! Our team will review your requirements and get back to you within 24 hours.');
-    
-    // Navigate back to shop
-    navigate('/shop');
+    setIsSubmitting(true);
+    try {
+      await customRequestsAPI.submitRequest(formData);
+      toast.success('Request submitted! Our team will contact you within 24 hours.');
+      navigate('/shop');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to submit request. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -189,14 +195,17 @@ export default function RequestCustomProduct() {
                 </div>
               </div>
 
-              {/* Submit Button */}
               <div className="pt-6">
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  disabled={isSubmitting}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-4 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
-                  <Plus className="w-5 h-5" />
-                  Submit Request
+                  {isSubmitting ? (
+                    <><Loader2 className="w-5 h-5 animate-spin" /> Submitting...</>
+                  ) : (
+                    <><Plus className="w-5 h-5" /> Submit Request</>
+                  )}
                 </button>
               </div>
             </div>

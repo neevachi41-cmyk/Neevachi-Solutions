@@ -17,6 +17,9 @@ import usersRoutes from './routes/users.js';
 import servicesRoutes from './routes/services.js';
 import postsRoutes from './routes/posts.js';
 import projectsRoutes from './routes/projects.js';
+import printOrdersRoutes from './routes/printOrders.js';
+import pcbOrdersRoutes from './routes/pcbOrders.js';
+import customRequestsRoutes from './routes/customRequests.js';
 
 // Configure __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -81,6 +84,10 @@ app.use('/api/admin/users', usersRoutes);
 app.use('/api/admin/services', servicesRoutes);
 app.use('/api/admin/posts', postsRoutes);
 app.use('/api/admin/projects', projectsRoutes);
+// New order routes
+app.use('/api/print-orders', printOrdersRoutes);
+app.use('/api/pcb-orders', pcbOrdersRoutes);
+app.use('/api/custom-requests', customRequestsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

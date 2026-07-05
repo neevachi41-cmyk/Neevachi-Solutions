@@ -209,4 +209,74 @@ export const projectsAPI = {
   },
 };
 
+// ============================================
+// API CONNECTION: 3D Print Orders
+// Backend: /print-orders
+// ============================================
+export const printOrdersAPI = {
+  submitOrder: async (data: unknown) => {
+    const response = await api.post('/print-orders', data);
+    return response.data;
+  },
+  getOrders: async () => {
+    const response = await api.get('/print-orders');
+    return response.data;
+  },
+  updateStatus: async (id: string, status: string) => {
+    const response = await api.patch(`/print-orders/${id}/status`, { status });
+    return response.data;
+  },
+  deleteOrder: async (id: string) => {
+    const response = await api.delete(`/print-orders/${id}`);
+    return response.data;
+  },
+};
+
+// ============================================
+// API CONNECTION: PCB Orders
+// Backend: /pcb-orders
+// ============================================
+export const pcbOrdersAPI = {
+  submitOrder: async (data: unknown) => {
+    const response = await api.post('/pcb-orders', data);
+    return response.data;
+  },
+  getOrders: async () => {
+    const response = await api.get('/pcb-orders');
+    return response.data;
+  },
+  updateStatus: async (id: string, status: string) => {
+    const response = await api.patch(`/pcb-orders/${id}/status`, { status });
+    return response.data;
+  },
+  deleteOrder: async (id: string) => {
+    const response = await api.delete(`/pcb-orders/${id}`);
+    return response.data;
+  },
+};
+
+// ============================================
+// API CONNECTION: Custom Product Requests
+// Backend: /custom-requests
+// ============================================
+export const customRequestsAPI = {
+  submitRequest: async (data: unknown) => {
+    const response = await api.post('/custom-requests', data);
+    return response.data;
+  },
+  getRequests: async () => {
+    const response = await api.get('/custom-requests');
+    return response.data;
+  },
+  updateStatus: async (id: string, status: string, adminNotes?: string) => {
+    const response = await api.patch(`/custom-requests/${id}/status`, { status, adminNotes });
+    return response.data;
+  },
+  deleteRequest: async (id: string) => {
+    const response = await api.delete(`/custom-requests/${id}`);
+    return response.data;
+  },
+};
+
 export default api;
+
