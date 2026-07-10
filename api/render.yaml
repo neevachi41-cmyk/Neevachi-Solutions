@@ -6,7 +6,7 @@ services:
     startCommand: node server.js
     envVars:
       - key: MONGODB_URI
-        sync: false
+        value: mongodb+srv://neevachi41_db_user:Pranit19702006@cluster0.l3whoaz.mongodb.net/?appName=Cluster0
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
