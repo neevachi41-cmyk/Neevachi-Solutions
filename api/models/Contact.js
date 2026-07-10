@@ -22,3 +22,14 @@ const contactSchema = new mongoose.Schema({
 const Contact = mongoose.models.Contact || mongoose.model('Contact', contactSchema);
 
 export default Contact;
+
+import { Resend } from 'resend';
+
+const resend = new Resend('re_RaTkNwUY_AW3tvhGCd3xANMqYjzw6EWem');
+
+resend.emails.send({
+  from: 'onboarding@resend.dev',
+  to: 'neevachi41@gmail.com',
+  subject: 'Hello World',
+  html: '<p>Congrats on sending your <strong>first email</strong>!</p>'
+});
