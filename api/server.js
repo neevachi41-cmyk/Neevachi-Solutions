@@ -1,6 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config(); // ✅ MUST be first — before any other imports that read env vars
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
@@ -25,58 +27,73 @@ import customRequestsRoutes from './routes/customRequests.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config();
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+// ─── Security Middleware ───────────────────────────────────────────────────
 app.use(helmet({
-  contentSecurityPolicy: false, // Disable CSP for now, configure properly in production
+  contentSecurityPolicy: false,
 }));
 
-// Configure CORS
-const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
+// ─── CORS ─────────────────────────────────────────────────────────────────
+const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:8080,http://172.20.10.7:8080')
+  .split(',')
+  .map(o => o.trim());
+
 app.use(cors({
-  origin: corsOrigin,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, curl)
+    if (!origin || corsOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS blocked: ${origin}`));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Rate limiting
+// ─── Rate Limiting ─────────────────────────────────────────────────────────
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
+  max: 100,
+  message: { message: 'Too many requests from this IP, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use('/api/', limiter);
 
 // Auth-specific rate limiting (stricter)
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 auth requests per windowMs
-  message: 'Too many authentication attempts, please try again later.',
+  windowMs: 15 * 60 * 1000,
+  max: 10, // raised from 5 to avoid lockouts during dev
+  message: { message: 'Too many authentication attempts, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-app.use(express.json());
+// ─── Body Parser ──────────────────────────────────────────────────────────
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-// Session middleware for Passport
+// ─── Session (for Passport OAuth) ─────────────────────────────────────────
 app.use(session({
   secret: process.env.SESSION_SECRET || 'neevachi-session-secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
 
-// Initialize Passport
+// ─── Passport ─────────────────────────────────────────────────────────────
 app.use(passport.initialize());
 app.use(passport.session());
 
-// API Routes
+// ─── API Routes ───────────────────────────────────────────────────────────
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/slider-updates', sliderUpdateRoutes);
@@ -84,52 +101,75 @@ app.use('/api/admin/users', usersRoutes);
 app.use('/api/admin/services', servicesRoutes);
 app.use('/api/admin/posts', postsRoutes);
 app.use('/api/admin/projects', projectsRoutes);
-// New order routes
 app.use('/api/print-orders', printOrdersRoutes);
 app.use('/api/pcb-orders', pcbOrdersRoutes);
 app.use('/api/custom-requests', customRequestsRoutes);
 
-// Health check
+// ─── Health Check ─────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
+  res.json({
+    status: 'OK',
+    message: 'Server is running',
+    mongodb: 'connected',
+    timestamp: new Date().toISOString()
+  });
 });
 
-// Serve static files from the dist directory (if it exists)
-const distPath = path.join(__dirname, 'dist');
+// ─── Serve Frontend (production) ──────────────────────────────────────────
+// The frontend dist is built into the ROOT dist folder (one level up from /api)
+const distPath = path.join(__dirname, '..', 'dist');
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
-  
-  // For all other non-API routes, serve the index.html file
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
+  // Note: SPA routing handled by frontend in production
 } else {
-  // If dist folder doesn't exist, provide a simple root route
   app.get('/', (req, res) => {
-    res.json({ 
-      message: 'Backend API is running', 
-      endpoints: ['/api/health', '/api/auth', '/api/contact', '/api/slider-updates', '/api/admin/users', '/api/admin/services', '/api/admin/posts'],
-      note: 'Frontend not built yet. Build frontend to serve full application.'
+    res.json({
+      message: '✅ Neevachi Backend API is running',
+      version: '1.0.0',
+      endpoints: {
+        health: '/api/health',
+        auth: '/api/auth',
+        contact: '/api/contact',
+        sliderUpdates: '/api/slider-updates',
+        printOrders: '/api/print-orders',
+        pcbOrders: '/api/pcb-orders',
+        customRequests: '/api/custom-requests',
+        admin: {
+          users: '/api/admin/users',
+          services: '/api/admin/services',
+          posts: '/api/admin/posts',
+          projects: '/api/admin/projects',
+        }
+      }
     });
   });
 }
 
-// Start the server
+// ─── Global Error Handler ─────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err.message);
+  res.status(500).json({ message: 'Internal server error', error: err.message });
+});
+
+// ─── Start Server ─────────────────────────────────────────────────────────
 const startServer = async () => {
-  // Connect to MongoDB
   await dbConnect();
-  
+
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`MongoDB Connected: ${process.env.MONGODB_URI || 'localhost'}`);
-    console.log(`Open http://localhost:${PORT} to view the application`);
-    console.log(`Or access it from your network at: http://${getLocalIpAddress()}:${PORT}`);
+    const localIP = getLocalIpAddress();
+    console.log('\n🚀 Neevachi Backend Server Started');
+    console.log(`   Local:   http://localhost:${PORT}`);
+    console.log(`   Network: http://${localIP}:${PORT}`);
+    console.log(`   API:     http://localhost:${PORT}/api/health\n`);
   });
 };
 
-startServer();
+startServer().catch(err => {
+  console.error('❌ Failed to start server:', err.message);
+  process.exit(1);
+});
 
-// Function to get local IP address
+// Helper: get local IPv4 address
 function getLocalIpAddress() {
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {

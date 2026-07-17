@@ -3,7 +3,8 @@ import mongoose from 'mongoose';
 const serviceSchema = new mongoose.Schema({
   title: { 
     type: String, 
-    required: true 
+    required: true,
+    trim: true
   },
   description: { 
     type: String, 
@@ -12,6 +13,12 @@ const serviceSchema = new mongoose.Schema({
   icon: { 
     type: String 
   },
+  imageUrl: {
+    type: String
+  },
+  features: [{
+    type: String
+  }],
   order: { 
     type: Number, 
     default: 0 

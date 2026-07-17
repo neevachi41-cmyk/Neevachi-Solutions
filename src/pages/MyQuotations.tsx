@@ -1,56 +1,73 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
-import { ArrowLeft, CheckCircle, Clock, Download, FileText, Printer, Share2, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Download, FileText, Printer, Share2, XCircle, Box, CircuitBoard, Wrench } from 'lucide-react';
 
-const quotations = [
-  { 
-    id: 1, 
-    title: 'Website Redesign', 
-    date: '2023-11-15', 
-    status: 'Accepted',
-    amount: '$4,200',
-    client: 'Acme Corp',
-    description: 'Complete redesign of company website with modern UI/UX',
-    items: [
-      { name: 'UI/UX Design', quantity: 1, rate: 2000, total: 2000 },
-      { name: 'Frontend Development', quantity: 1, rate: 1500, total: 1500 },
-      { name: 'Backend Integration', quantity: 1, rate: 700, total: 700 }
-    ]
-  },
-  { 
-    id: 2, 
-    title: 'Mobile App Development', 
-    date: '2023-11-10', 
-    status: 'Pending',
-    amount: '$7,500',
-    client: 'TechStart Inc',
-    description: 'Cross-platform mobile application development',
-    items: [
-      { name: 'UI/UX Design', quantity: 1, rate: 2500, total: 2500 },
-      { name: 'Frontend Development', quantity: 1, rate: 3000, total: 3000 },
-      { name: 'API Development', quantity: 1, rate: 2000, total: 2000 }
-    ]
-  },
-  { 
-    id: 3, 
-    title: 'E-commerce Platform', 
-    date: '2023-11-05', 
-    status: 'Draft',
-    amount: '$12,000',
-    client: 'ShopEase',
-    description: 'Custom e-commerce platform with payment integration',
-    items: [
-      { name: 'UI/UX Design', quantity: 1, rate: 3000, total: 3000 },
-      { name: 'Frontend Development', quantity: 1, rate: 4000, total: 4000 },
-      { name: 'Backend Development', quantity: 1, rate: 5000, total: 5000 }
-    ]
-  }
-];
+import { pcbOrdersAPI, printOrdersAPI, customRequestsAPI } from '@/lib/api/admin';
 
 const MyQuotations = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedQuotation, setSelectedQuotation] = useState(null);
+  const [quotations, setQuotations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all'); // all, pcb, print, custom
+
+  useEffect(() => {
+    fetchQuotations();
+  }, [user]);
+
+  const fetchQuotations = async () => {
+    try {
+      const [pcbOrders, printOrders, customRequests] = await Promise.all([
+        pcbOrdersAPI.getOrders().catch(() => []),
+        printOrdersAPI.getOrders().catch(() => []),
+        customRequestsAPI.getRequests().catch(() => []),
+      ]);
+
+      const allQuotations = [
+        ...pcbOrders.map(order => ({
+          ...order,
+          type: 'pcb',
+          title: `PCB Order - ${order.layers} Layers`,
+          amount: `₹${order.calculatedPrice || 0}`,
+          client: order.customerName,
+          icon: CircuitBoard
+        })),
+        ...printOrders.map(order => ({
+          ...order,
+          type: 'print',
+          title: `3D Print Order - ${order.material}`,
+          amount: `₹${order.totalPrice || 0}`,
+          client: order.customerName,
+          icon: Box
+        })),
+        ...customRequests.map(request => ({
+          ...request,
+          type: 'custom',
+          title: `Custom Request - ${request.productType}`,
+          amount: request.budget || 'TBD',
+          client: request.contactEmail,
+          icon: Wrench
+        }))
+      ];
+
+      // Filter by user email if available
+      const userQuotations = user?.email 
+        ? allQuotations.filter(q => 
+            q.customerEmail === user.email || 
+            q.contactEmail === user.email
+          )
+        : allQuotations;
+
+      setQuotations(userQuotations);
+    } catch (error) {
+      console.error('Error fetching quotations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const viewQuotationDetails = (quotation) => {
     setSelectedQuotation(quotation);
@@ -61,8 +78,10 @@ const MyQuotations = () => {
   };
 
   const getStatusBadge = (status) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'accepted':
+      case 'completed':
+      case 'confirmed':
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
             <CheckCircle className="h-3 w-3 mr-1" />
@@ -70,6 +89,8 @@ const MyQuotations = () => {
           </span>
         );
       case 'pending':
+      case 'reviewing':
+      case 'new':
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
             <Clock className="h-3 w-3 mr-1" />
@@ -77,6 +98,7 @@ const MyQuotations = () => {
           </span>
         );
       case 'rejected':
+      case 'cancelled':
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
             <XCircle className="h-3 w-3 mr-1" />
@@ -86,11 +108,26 @@ const MyQuotations = () => {
       default:
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            {status}
+            {status || 'Unknown'}
           </span>
         );
     }
   };
+
+  const filteredQuotations = filter === 'all' 
+    ? quotations 
+    : quotations.filter(q => q.type === filter);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading quotations...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -105,7 +142,24 @@ const MyQuotations = () => {
               Back
             </button>
             <h1 className="text-2xl font-bold text-gray-900">My Quotations</h1>
-            <div className="w-24"></div> {/* For alignment */}
+            <div className="w-24"></div>
+          </div>
+          
+          {/* Filter Tabs */}
+          <div className="flex gap-2 mb-6">
+            {['all', 'pcb', 'print', 'custom'].map((filterType) => (
+              <button
+                key={filterType}
+                onClick={() => setFilter(filterType)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  filter === filterType
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
+              </button>
+            ))}
           </div>
           
           <div className="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -115,77 +169,92 @@ const MyQuotations = () => {
                   Quotation History
                 </h3>
                 <span className="text-sm text-gray-500">
-                  {quotations.length} {quotations.length === 1 ? 'quotation' : 'quotations'}
+                  {filteredQuotations.length} {filteredQuotations.length === 1 ? 'quotation' : 'quotations'}
                 </span>
               </div>
             </div>
             
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Title
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Client
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th scope="col" className="relative px-6 py-3">
-                      <span className="sr-only">Actions</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {quotations.map((quotation) => (
-                    <tr key={quotation.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                            <FileText className="h-5 w-5 text-blue-600" />
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{quotation.title}</div>
-                            <div className="text-sm text-gray-500">{quotation.description}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {quotation.client}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(quotation.date).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {quotation.amount}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(quotation.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => viewQuotationDetails(quotation)}
-                          className="text-blue-600 hover:text-blue-900 mr-4"
-                        >
-                          View
-                        </button>
-                        <button className="text-gray-600 hover:text-gray-900">
-                          <Download className="h-4 w-4" />
-                        </button>
-                      </td>
+            {filteredQuotations.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No quotations found</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  {filter === 'all' 
+                    ? "You haven't placed any orders yet." 
+                    : `No ${filter} quotations found.`}
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Title
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Client
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th scope="col" className="relative px-6 py-3">
+                        <span className="sr-only">Actions</span>
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredQuotations.map((quotation) => (
+                      <tr key={quotation._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                              {quotation.icon && <quotation.icon className="h-5 w-5 text-blue-600" />}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{quotation.title}</div>
+                          <div className="text-sm text-gray-500 capitalize">{quotation.type}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {quotation.client}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(quotation.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {quotation.amount}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(quotation.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => viewQuotationDetails(quotation)}
+                            className="text-blue-600 hover:text-blue-900 mr-4"
+                          >
+                            View
+                          </button>
+                          <button className="text-gray-600 hover:text-gray-900">
+                            <Download className="h-4 w-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -244,13 +313,17 @@ const MyQuotations = () => {
                 <div className="mt-6 border-t border-gray-200 pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
+                      <h4 className="text-sm font-medium text-gray-500">Type</h4>
+                      <p className="mt-1 text-sm text-gray-900 capitalize">{selectedQuotation.type}</p>
+                    </div>
+                    <div>
                       <h4 className="text-sm font-medium text-gray-500">Client</h4>
                       <p className="mt-1 text-sm text-gray-900">{selectedQuotation.client}</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-gray-500">Date</h4>
                       <p className="mt-1 text-sm text-gray-900">
-                        {new Date(selectedQuotation.date).toLocaleDateString('en-US', {
+                        {new Date(selectedQuotation.createdAt).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric'
@@ -264,7 +337,7 @@ const MyQuotations = () => {
                       </div>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-500">Total Amount</h4>
+                      <h4 className="text-sm font-medium text-gray-500">Amount</h4>
                       <p className="mt-1 text-lg font-bold text-gray-900">
                         {selectedQuotation.amount}
                       </p>
@@ -272,76 +345,93 @@ const MyQuotations = () => {
                   </div>
                 </div>
 
-                <div className="mt-8">
-                  <h4 className="text-sm font-medium text-gray-900 mb-4">Items</h4>
-                  <div className="overflow-hidden border border-gray-200 rounded-lg">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Item
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Qty
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Rate
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Total
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {selectedQuotation.items.map((item, index) => (
-                          <tr key={index}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {item.name}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                              {item.quantity}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
-                              ${item.rate.toLocaleString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
-                              ${item.total.toLocaleString()}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                      <tfoot>
-                        <tr>
-                          <td colSpan={3} className="px-6 py-3 text-right text-sm font-medium text-gray-500">
-                            Subtotal
-                          </td>
-                          <td className="px-6 py-3 text-right text-sm font-medium text-gray-900">
-                            {selectedQuotation.amount}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td colSpan={3} className="px-6 py-3 text-right text-sm font-medium text-gray-500">
-                            Tax (0%)
-                          </td>
-                          <td className="px-6 py-3 text-right text-sm font-medium text-gray-900">
-                            $0.00
-                          </td>
-                        </tr>
-                        <tr>
-                          <td colSpan={3} className="px-6 py-3 text-right text-sm font-medium text-gray-500">
-                            Total
-                          </td>
-                          <td className="px-6 py-3 text-right text-lg font-bold text-gray-900 border-t border-gray-200">
-                            {selectedQuotation.amount}
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
+                {/* Dynamic content based on quotation type */}
+                {selectedQuotation.type === 'pcb' && (
+                  <div className="mt-8">
+                    <h4 className="text-sm font-medium text-gray-900 mb-4">PCB Specifications</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <div>
+                        <h5 className="text-xs text-gray-500">Layers</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.layers}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs text-gray-500">Quantity</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.pcbQty}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs text-gray-500">Thickness</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.pcbThickness}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs text-gray-500">Color</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.pcbColor}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs text-gray-500">Surface Finish</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.surfaceFinish}</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {selectedQuotation.type === 'print' && (
+                  <div className="mt-8">
+                    <h4 className="text-sm font-medium text-gray-900 mb-4">Print Specifications</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <div>
+                        <h5 className="text-xs text-gray-500">Material</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.material}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs text-gray-500">Color</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.color}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs text-gray-500">Infill</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.infill}%</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs text-gray-500">Quantity</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.quantity}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs text-gray-500">Printer</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.printer}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedQuotation.type === 'custom' && (
+                  <div className="mt-8">
+                    <h4 className="text-sm font-medium text-gray-900 mb-4">Custom Request Details</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h5 className="text-xs text-gray-500">Product Type</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.productType}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs text-gray-500">Quantity</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.quantity}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs text-gray-500">Budget</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.budget}</p>
+                      </div>
+                      <div>
+                        <h5 className="text-xs text-gray-500">Timeline</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.timeline}</p>
+                      </div>
+                      <div className="md:col-span-2">
+                        <h5 className="text-xs text-gray-500">Description</h5>
+                        <p className="text-sm font-medium">{selectedQuotation.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                {selectedQuotation.status === 'Pending' && (
+                {(selectedQuotation.status === 'Pending' || selectedQuotation.status === 'New' || selectedQuotation.status === 'Reviewing') && (
                   <>
                     <button
                       type="button"

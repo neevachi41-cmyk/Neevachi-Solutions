@@ -4,7 +4,7 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useClickOutside } from '@/hooks/useClickOutside';
 
-import { ChevronDown, FileText, LogOut, Menu, Shield, User, X, Zap } from 'lucide-react';
+import { ChevronDown, FileText, LogOut, Menu, Shield, User, X, Zap, FolderOpen } from 'lucide-react';
 
 const navItems = [
   { name: 'Home', path: '/' },
@@ -23,9 +23,9 @@ const ProfileDropdown = ({ userName, isAdmin }: { userName: string; isAdmin: boo
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
     navigate('/login');
-    window.location.reload();
   };
 
   return (
@@ -61,6 +61,14 @@ const ProfileDropdown = ({ userName, isAdmin }: { userName: string; isAdmin: boo
           >
             <FileText className="mr-3 h-5 w-5 text-gray-400" />
             My Quotations
+          </Link>
+          <Link
+            to="/my-projects"
+            className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+            onClick={() => setIsOpen(false)}
+          >
+            <FolderOpen className="mr-3 h-5 w-5 text-gray-400" />
+            My Projects
           </Link>
           <Link
             to="/profile"
@@ -104,11 +112,11 @@ export function Header() {
 
   useEffect(() => {
     // Check if user is logged in
-    const userData = localStorage.getItem('user');
+    const userData = localStorage.getItem('userData');
     if (userData) {
       try {
         const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
+        setUser({ name: parsedUser.name || parsedUser.email, isAdmin: parsedUser.role === 'admin' });
       } catch (e) {
         console.error('Error parsing user data:', e);
       }
@@ -121,9 +129,10 @@ export function Header() {
   }, [location]);
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+    setUser(null);
     navigate('/login');
-    window.location.reload();
   };
 
   return (
@@ -244,6 +253,13 @@ export function Header() {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     My Quotations
+                  </Link>
+                  <Link
+                    to="/my-projects"
+                    className="block px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    My Projects
                   </Link>
                   <Link
                     to="/profile"

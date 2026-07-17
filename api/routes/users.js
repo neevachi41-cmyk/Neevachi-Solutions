@@ -1,23 +1,24 @@
 import express from 'express';
 import User from '../models/User.js';
+import { authenticate, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Get all users (admin only)
-router.get('/', async (req, res) => {
+// GET /api/admin/users — Get all users (admin only)
+router.get('/', authenticate, isAdmin, async (req, res) => {
   try {
-    const users = await User.find({}, { password: 0 }).sort({ createdAt: -1 });
-    res.json(users);
+    const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+    res.json({ count: users.length, users });
   } catch (error) {
     console.error('Get users error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// Get single user
-router.get('/:id', async (req, res) => {
+// GET /api/admin/users/:id — Get single user (admin only)
+router.get('/:id', authenticate, isAdmin, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id, { password: 0 });
+    const user = await User.findById(req.params.id).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -28,36 +29,46 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create user (admin only)
-router.post('/', async (req, res) => {
+// POST /api/admin/users — Create user (admin only)
+router.post('/', authenticate, isAdmin, async (req, res) => {
   try {
-    const { email, password, role = 'user' } = req.body;
-    const user = await User.create({ email, password, role });
+    const { email, password, name, role = 'user' } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required.' });
+    }
+
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ message: 'User already exists with this email.' });
+    }
+
+    const user = await User.create({ email, password, name, role, provider: 'local' });
     res.status(201).json(user.toSafeObject());
   } catch (error) {
     console.error('Create user error:', error);
     if (error.code === 11000) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: 'User already exists with this email.' });
     }
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// Update user
-router.put('/:id', async (req, res) => {
+// PUT /api/admin/users/:id — Update user (admin only)
+router.put('/:id', authenticate, isAdmin, async (req, res) => {
   try {
-    const { email, role } = req.body;
-    
+    const { email, name, role, isActive } = req.body;
+
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      { email, role, updatedAt: new Date() },
-      { new: true, projection: { password: 0 } }
-    );
-    
+      { email, name, role, isActive },
+      { new: true, runValidators: true }
+    ).select('-password');
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     res.json(user);
   } catch (error) {
     console.error('Update user error:', error);
@@ -65,15 +76,19 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete user
-router.delete('/:id', async (req, res) => {
+// DELETE /api/admin/users/:id — Delete user (admin only)
+router.delete('/:id', authenticate, isAdmin, async (req, res) => {
   try {
+    // Prevent deleting yourself
+    if (req.params.id === req.user.userId) {
+      return res.status(400).json({ message: 'You cannot delete your own account.' });
+    }
+
     const user = await User.findByIdAndDelete(req.params.id);
-    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Delete user error:', error);

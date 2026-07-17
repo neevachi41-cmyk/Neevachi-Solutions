@@ -23,6 +23,9 @@ export default function Dashboard() {
           <Button variant="outline" asChild>
             <Link to="/admin/contact">Contact</Link>
           </Button>
+          <Button variant="outline" asChild>
+            <Link to="/admin/projects">Projects</Link>
+          </Button>
         </div>
       </div>
 

@@ -3,15 +3,31 @@ import mongoose from 'mongoose';
 const contactSchema = new mongoose.Schema({
   name: { 
     type: String, 
-    required: true 
+    required: true,
+    trim: true
   },
   email: { 
     type: String, 
-    required: true 
+    required: true,
+    lowercase: true,
+    trim: true
+  },
+  phone: {
+    type: String,
+    trim: true
+  },
+  subject: {
+    type: String,
+    trim: true
   },
   message: { 
     type: String, 
     required: true 
+  },
+  status: {
+    type: String,
+    enum: ['New', 'Read', 'Replied'],
+    default: 'New'
   },
   createdAt: { 
     type: Date, 
@@ -22,14 +38,3 @@ const contactSchema = new mongoose.Schema({
 const Contact = mongoose.models.Contact || mongoose.model('Contact', contactSchema);
 
 export default Contact;
-
-import { Resend } from 'resend';
-
-const resend = new Resend('re_RaTkNwUY_AW3tvhGCd3xANMqYjzw6EWem');
-
-resend.emails.send({
-  from: 'onboarding@resend.dev',
-  to: 'neevachi41@gmail.com',
-  subject: 'Hello World',
-  html: '<p>Congrats on sending your <strong>first email</strong>!</p>'
-});

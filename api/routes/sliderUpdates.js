@@ -1,29 +1,30 @@
 import express from 'express';
 import SliderUpdate from '../models/SliderUpdate.js';
+import { authenticate, isAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Get all slider updates (public endpoint)
+// GET /api/slider-updates — Get all active slider items (public)
 router.get('/', async (req, res) => {
   try {
-    const updates = await SliderUpdate.find({ isActive: true }).sort({ createdAt: -1 });
+    const updates = await SliderUpdate.find({ isActive: true }).sort({ order: 1 });
     res.json(updates);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching slider updates', error: error.message });
   }
 });
 
-// Get all slider updates (admin endpoint - includes inactive)
-router.get('/admin/all', async (req, res) => {
+// GET /api/slider-updates/admin/all — Get all incl. inactive (admin only)
+router.get('/admin/all', authenticate, isAdmin, async (req, res) => {
   try {
-    const updates = await SliderUpdate.find({}).sort({ createdAt: -1 });
-    res.json(updates);
+    const updates = await SliderUpdate.find({}).sort({ order: 1 });
+    res.json({ count: updates.length, updates });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching slider updates', error: error.message });
   }
 });
 
-// Get single slider update
+// GET /api/slider-updates/:id — Get single slider item
 router.get('/:id', async (req, res) => {
   try {
     const update = await SliderUpdate.findById(req.params.id);
@@ -36,9 +37,13 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create new slider update
-router.post('/', async (req, res) => {
+// POST /api/slider-updates — Create slider item (admin only)
+router.post('/', authenticate, isAdmin, async (req, res) => {
   try {
+    const { title, imageUrl } = req.body;
+    if (!title || !imageUrl) {
+      return res.status(400).json({ message: 'Title and imageUrl are required.' });
+    }
     const savedUpdate = await SliderUpdate.create(req.body);
     res.status(201).json(savedUpdate);
   } catch (error) {
@@ -46,13 +51,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Update slider update
-router.put('/:id', async (req, res) => {
+// PUT /api/slider-updates/:id — Update slider item (admin only)
+router.put('/:id', authenticate, isAdmin, async (req, res) => {
   try {
     const update = await SliderUpdate.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }
+      { new: true, runValidators: true }
     );
     if (!update) {
       return res.status(404).json({ message: 'Slider update not found' });
@@ -63,8 +68,8 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Delete slider update
-router.delete('/:id', async (req, res) => {
+// DELETE /api/slider-updates/:id — Delete slider item (admin only)
+router.delete('/:id', authenticate, isAdmin, async (req, res) => {
   try {
     const update = await SliderUpdate.findByIdAndDelete(req.params.id);
     if (!update) {
@@ -76,19 +81,16 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Toggle active status
-router.patch('/:id/toggle', async (req, res) => {
+// PATCH /api/slider-updates/:id/toggle — Toggle active status (admin only)
+router.patch('/:id/toggle', authenticate, isAdmin, async (req, res) => {
   try {
     const update = await SliderUpdate.findById(req.params.id);
     if (!update) {
       return res.status(404).json({ message: 'Slider update not found' });
     }
-    const updated = await SliderUpdate.findByIdAndUpdate(
-      req.params.id,
-      { isActive: !update.isActive },
-      { new: true }
-    );
-    res.json(updated);
+    update.isActive = !update.isActive;
+    await update.save();
+    res.json(update);
   } catch (error) {
     res.status(500).json({ message: 'Error toggling slider update', error: error.message });
   }

@@ -34,6 +34,13 @@ const userSchema = new mongoose.Schema({
   providerId: {
     type: String
   },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  lastLogin: {
+    type: Date
+  },
   createdAt: { 
     type: Date, 
     default: Date.now 
@@ -41,24 +48,24 @@ const userSchema = new mongoose.Schema({
 });
 
 // Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    if (typeof next === 'function') next();
-    return;
+userSchema.pre('save', function(next) {
+  if (!this.isModified('password') || !this.password) {
+    return next();
   }
-  
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    if (typeof next === 'function') next();
-  } catch (error) {
-    if (typeof next === 'function') next(error);
-    throw error;
-  }
+
+  bcrypt.genSalt(10, (err, salt) => {
+    if (err) return next(err);
+    bcrypt.hash(this.password, salt, (err, hash) => {
+      if (err) return next(err);
+      this.password = hash;
+      next();
+    });
+  });
 });
 
 // Method to compare password
 userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!this.password) return false;
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
@@ -71,18 +78,16 @@ userSchema.methods.toSafeObject = function() {
     role: this.role,
     avatar: this.avatar,
     provider: this.provider,
+    isActive: this.isActive,
     createdAt: this.createdAt
   };
 };
 
-const User = mongoose.models.User || mongoose.model('User', userSchema);
-
-// Ensure hooks are registered if model already exists
+// Delete cached model to prevent OverwriteModelError in dev
 if (mongoose.models.User) {
   delete mongoose.models.User;
-  delete mongoose.connection.models.User;
 }
 
-const UserModel = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
 
-export default UserModel;
+export default User;

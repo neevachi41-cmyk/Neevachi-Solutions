@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('userData', JSON.stringify(data.user));
       setUser(data.user);
 
-      navigate('/admin/dashboard');
+      navigate('/');
       toast.success('Login successful');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Login failed');

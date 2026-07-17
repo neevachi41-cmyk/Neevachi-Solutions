@@ -20,7 +20,10 @@ import CategoryPage from './pages/CategoryPage';
 import Contact from './pages/Contact';
 import Index from './pages/Index';
 import Login from './pages/Login';
+import MyProjects from './pages/MyProjects';
+import MyQuotations from './pages/MyQuotations';
 import NotFound from './pages/NotFound';
+import Profile from './pages/Profile';
 import PcbQuotation from './pages/PcbQuotation';
 import PrintingService from './pages/PrintingService';
 import ProductDetail from './pages/ProductDetail';
@@ -38,6 +41,7 @@ import ServicesAdmin from './pages/ServicesAdmin';
 import UsersAdmin from './pages/UsersAdmin';
 import BlogAdmin from './pages/BlogAdmin';
 import ContactAdmin from './pages/ContactAdmin';
+import ProjectsAdmin from './pages/ProjectsAdmin';
 import Unauthorized from './pages/Unauthorized';
 
 const queryClient = new QueryClient();
@@ -73,6 +77,11 @@ const App: React.FC = () => {
                   <Route path="/pcb-quotation" element={<PcbQuotation />} />
                   <Route path="/request-custom-product" element={<RequestCustomProduct />} />
                   
+                  {/* Protected user routes */}
+                  <Route path="/my-projects" element={<ProtectedRoute><MyProjects /></ProtectedRoute>} />
+                  <Route path="/my-quotations" element={<ProtectedRoute><MyQuotations /></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                  
                   {/* Protected routes */}
                   <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
                   <Route path="/admin/slider-updates" element={<ProtectedRoute allowedRoles={['admin']}><SliderUpdatesAdmin /></ProtectedRoute>} />
@@ -80,6 +89,7 @@ const App: React.FC = () => {
                   <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><UsersAdmin /></ProtectedRoute>} />
                   <Route path="/admin/blog" element={<ProtectedRoute allowedRoles={['admin']}><BlogAdmin /></ProtectedRoute>} />
                   <Route path="/admin/contact" element={<ProtectedRoute allowedRoles={['admin']}><ContactAdmin /></ProtectedRoute>} />
+                  <Route path="/admin/projects" element={<ProtectedRoute allowedRoles={['admin']}><ProjectsAdmin /></ProtectedRoute>} />
                   
                   <Route path="*" element={<NotFound />} />
                 </Route>

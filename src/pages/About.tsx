@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Bot, Cpu, Wifi, CircuitBoard, Layers, Target, Users, Award, Zap, Rocket } from 'lucide-react';
+import { Bot, Cpu, Wifi, CircuitBoard, Layers, Target, Users, Award, Zap, Rocket, Linkedin, Github, Mail, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const About = () => {
@@ -10,6 +10,45 @@ const About = () => {
     { icon: CircuitBoard, title: "PCB Design", desc: "Professional circuit design services" },
     { icon: Layers, title: "3D Engineering", desc: "CAD modeling and engineering" },
     { icon: Zap, title: "Prototyping", desc: "End-to-end prototyping solutions" },
+  ];
+
+  const teamMembers = [
+    {
+      name: "Pranit Patil",
+      role: "Founder & Lead Engineer",
+      image: "https://via.placeholder.com/150x150/3B82F6/FFFFFF?text=PP",
+      bio: "Expert in robotics and embedded systems with 5+ years of experience in delivering innovative solutions.",
+      linkedin: "#",
+      github: "#",
+      email: "pranit@neevachi.in"
+    },
+    {
+      name: "Team Member 2",
+      role: "Embedded Systems Engineer",
+      image: "https://via.placeholder.com/150x150/10B981/FFFFFF?text=TM",
+      bio: "Specialized in microcontroller programming and PCB design with a passion for IoT solutions.",
+      linkedin: "#",
+      github: "#",
+      email: "team@neevachi.in"
+    },
+    {
+      name: "Team Member 3",
+      role: "3D Design Specialist",
+      image: "https://via.placeholder.com/150x150/8B5CF6/FFFFFF?text=TM",
+      bio: "Expert in CAD modeling and 3D printing with extensive experience in rapid prototyping.",
+      linkedin: "#",
+      github: "#",
+      email: "team@neevachi.in"
+    },
+    {
+      name: "Team Member 4",
+      role: "Software Developer",
+      image: "https://via.placeholder.com/150x150/F59E0B/FFFFFF?text=TM",
+      bio: "Full-stack developer specializing in web applications and IoT platform integration.",
+      linkedin: "#",
+      github: "#",
+      email: "team@neevachi.in"
+    },
   ];
 
   const stats = [
@@ -155,6 +194,78 @@ const About = () => {
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{service.title}</h3>
                 <p className="text-gray-600">{service.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Team Section */}
+      <section className="py-20 px-4 bg-white">
+        <div className="container mx-auto max-w-7xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Meet Our Team</h2>
+            <p className="text-gray-600 text-lg max-w-3xl mx-auto">
+              The talented individuals behind Neevachi Solutions' success
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {teamMembers.map((member, index) => (
+              <motion.div
+                key={member.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+                className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-xl transition-all duration-500 group"
+              >
+                <div className="relative">
+                  <div className="aspect-square w-full overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50">
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+                
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-1">{member.name}</h3>
+                  <p className="text-blue-600 font-medium text-sm mb-3">{member.role}</p>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">{member.bio}</p>
+                  
+                  <div className="flex gap-3">
+                    <a
+                      href={member.linkedin}
+                      className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                      aria-label={`${member.name} LinkedIn`}
+                    >
+                      <Linkedin className="w-4 h-4" />
+                    </a>
+                    <a
+                      href={member.github}
+                      className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-800 hover:text-white transition-colors"
+                      aria-label={`${member.name} GitHub`}
+                    >
+                      <Github className="w-4 h-4" />
+                    </a>
+                    <a
+                      href={`mailto:${member.email}`}
+                      className="p-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                      aria-label={`Email ${member.name}`}
+                    >
+                      <Mail className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
