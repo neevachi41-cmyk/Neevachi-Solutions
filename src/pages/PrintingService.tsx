@@ -18,6 +18,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { printOrdersAPI } from '@/lib/api/admin';
 
 // Material options with pricing per gram
 const MATERIALS = [
@@ -626,24 +627,22 @@ const PrintingService = () => {
         dimensions: f.dimensions,
       }));
 
-      await import('@/lib/api/admin').then(({ printOrdersAPI }) =>
-        printOrdersAPI.submitOrder({
-          customerName: customerInfo.name,
-          customerEmail: customerInfo.email,
-          customerPhone: customerInfo.phone,
-          customerAddress: customerInfo.address,
-          notes: customerInfo.notes,
-          printer: settings.printer,
-          material: settings.material,
-          color: settings.color,
-          infill: settings.infill,
-          quantity: settings.quantity,
-          supports: settings.supports,
-          postProcessing: settings.postProcessing,
-          files: filesData,
-          totalPrice,
-        })
-      );
+      await printOrdersAPI.submitOrder({
+        customerName: customerInfo.name,
+        customerEmail: customerInfo.email,
+        customerPhone: customerInfo.phone,
+        customerAddress: customerInfo.address,
+        notes: customerInfo.notes,
+        printer: settings.printer,
+        material: settings.material,
+        color: settings.color,
+        infill: settings.infill,
+        quantity: settings.quantity,
+        supports: settings.supports,
+        postProcessing: settings.postProcessing,
+        files: filesData,
+        totalPrice,
+      });
 
       toast.success('Order submitted successfully! We will contact you shortly.');
 
