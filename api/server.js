@@ -36,7 +36,7 @@ app.use(helmet({
 }));
 
 // ─── CORS ─────────────────────────────────────────────────────────────────
-const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:8080,http://172.20.10.7:8080')
+const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:8080,http://10.198.55.248:8080,http://172.20.10.7:8080')
   .split(',')
   .map(o => o.trim());
 
