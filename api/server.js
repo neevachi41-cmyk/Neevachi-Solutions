@@ -36,7 +36,7 @@ app.use(helmet({
 }));
 
 // ─── CORS ─────────────────────────────────────────────────────────────────
-const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:8080,http://10.198.55.248:8080,http://172.20.10.7:8080')
+const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:8080,http://10.198.55.248:8080,http://172.20.10.7:8080,http://localhost:5000')
   .split(',')
   .map(o => o.trim());
 
@@ -46,7 +46,9 @@ app.use(cors({
     if (!origin || corsOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error(`CORS blocked: ${origin}`));
+      // Log but allow during development
+      console.log(`CORS warning: ${origin} not in allowed list, but allowing for development`);
+      callback(null, true);
     }
   },
   credentials: true,

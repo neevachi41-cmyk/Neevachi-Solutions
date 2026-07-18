@@ -11,6 +11,12 @@ export interface User {
   id: string;
   email: string;
   role: 'user' | 'admin';
+  name?: string;
+  phone?: string;
+  address?: string;
+  company?: string;
+  gstin?: string;
+  createdAt?: string;
 }
 
 export interface AuthContextType {
