@@ -31,13 +31,76 @@ const Projects = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Fallback projects data
+  const fallbackProjects = [
+    {
+      _id: '1',
+      title: 'Industrial Automation Robot',
+      description: 'Custom robotic arm for manufacturing automation with precision control and real-time monitoring.',
+      category: 'Robotics',
+      image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&auto=format&fit=crop',
+      technologies: ['Arduino', 'Python', 'Sensors'],
+      status: 'completed'
+    },
+    {
+      _id: '2',
+      title: 'Smart Home IoT System',
+      description: 'Complete home automation system with remote control, energy monitoring, and security features.',
+      category: 'IoT',
+      image: 'https://images.unsplash.com/photo-1558002038-1091a1661116?w=800&auto=format&fit=crop',
+      technologies: ['ESP32', 'MQTT', 'React'],
+      status: 'completed'
+    },
+    {
+      _id: '3',
+      title: 'PCB Design for Medical Device',
+      description: 'Custom PCB design for portable medical monitoring device with low power consumption.',
+      category: 'PCB Design',
+      image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop',
+      technologies: ['Altium', 'KiCad', 'Fusion 360'],
+      status: 'completed'
+    },
+    {
+      _id: '4',
+      title: '3D Printed Prosthetic',
+      description: 'Custom 3D printed prosthetic limb with adjustable fittings and lightweight design.',
+      category: '3D Engineering',
+      image: 'https://images.unsplash.com/photo-1562843299-f9c6c2b56b8e?w=800&auto=format&fit=crop',
+      technologies: ['Fusion 360', 'PLA', 'PETG'],
+      status: 'completed'
+    },
+    {
+      _id: '5',
+      title: 'Autonomous Drone',
+      description: 'Self-flying drone with obstacle avoidance and GPS navigation for aerial surveillance.',
+      category: 'Robotics',
+      image: 'https://images.unsplash.com/photo-1506947411487-a56738267384?w=800&auto=format&fit=crop',
+      technologies: ['Raspberry Pi', 'OpenCV', 'Python'],
+      status: 'completed'
+    },
+    {
+      _id: '6',
+      title: 'Smart Agriculture System',
+      description: 'IoT-based agricultural monitoring system with soil sensors and automated irrigation.',
+      category: 'IoT',
+      image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&auto=format&fit=crop',
+      technologies: ['Arduino', 'Sensors', 'Cloud'],
+      status: 'completed'
+    }
+  ];
+
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         const data = await projectsAPI.getProjects();
-        setProjects(data);
+        if (data && data.length > 0) {
+          setProjects(data);
+        } else {
+          setProjects(fallbackProjects);
+        }
       } catch (error) {
         console.error('Failed to fetch projects:', error);
+        setProjects(fallbackProjects);
       } finally {
         setLoading(false);
       }
