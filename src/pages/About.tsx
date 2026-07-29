@@ -303,7 +303,7 @@ const About = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Leadership & Team</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Meet Our Team Members</h2>
             <p className="text-gray-600 text-lg max-w-3xl mx-auto">
               {teamDescription}
             </p>
