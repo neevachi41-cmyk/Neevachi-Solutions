@@ -43,13 +43,28 @@ const Services = () => {
   const [selectedService, setSelectedService] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Fallback services data
+  const fallbackServices = [
+    { _id: '1', title: 'Robotics', description: 'Custom robotics solutions for automation', icon: 'Bot' },
+    { _id: '2', title: 'Embedded Systems', description: 'Advanced embedded system design', icon: 'Cpu' },
+    { _id: '3', title: 'IoT Solutions', description: 'Smart connectivity solutions', icon: 'Wifi' },
+    { _id: '4', title: 'PCB Design', description: 'Professional circuit design services', icon: 'CircuitBoard' },
+    { _id: '5', title: '3D Engineering', description: 'CAD modeling and engineering', icon: 'Layers' },
+    { _id: '6', title: 'Prototyping', description: 'End-to-end prototyping solutions', icon: 'Zap' },
+  ];
+
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const data = await servicesAPI.getServices();
-        setServices(data);
+        if (data && data.length > 0) {
+          setServices(data);
+        } else {
+          setServices(fallbackServices);
+        }
       } catch (error) {
         console.error('Failed to fetch services:', error);
+        setServices(fallbackServices);
       } finally {
         setLoading(false);
       }
