@@ -14,42 +14,80 @@ const About = () => {
 
   const teamMembers = [
     {
+      name: "Prathamesh Mali",
+      role: "Founder & Chief Executive Officer (CEO)",
+      image: "https://via.placeholder.com/150x150/3B82F6/FFFFFF?text=PM",
+      bio: "Leading the strategic vision and overall operations of Neevachi Solutions with expertise in business development and technology innovation.",
+      linkedin: "#",
+      github: "#",
+      email: "prathamesh@neevachi.in"
+    },
+    {
+      name: "Mandar Patil",
+      role: "Chief Operating Officer (COO) & Manager",
+      image: "https://via.placeholder.com/150x150/8B5CF6/FFFFFF?text=MP",
+      bio: "Overseeing daily operations and ensuring efficient project delivery with strong management and organizational skills.",
+      linkedin: "#",
+      github: "#",
+      email: "mandar@neevachi.in"
+    },
+    {
+      name: "Harshal Sonawane",
+      role: "Chief Marketing Officer (CMO) & AI/ML Engineer",
+      image: "https://via.placeholder.com/150x150/EC4899/FFFFFF?text=HS",
+      bio: "Combining marketing expertise with AI/ML engineering to drive brand growth and develop intelligent solutions.",
+      linkedin: "#",
+      github: "#",
+      email: "harshal@neevachi.in"
+    },
+    {
+      name: "Chaitanya Patil",
+      role: "Lead IoT Developer",
+      image: "https://via.placeholder.com/150x150/10B981/FFFFFF?text=CP",
+      bio: "Specializing in IoT architecture and development, creating connected solutions for smart applications and industrial automation.",
+      linkedin: "#",
+      github: "#",
+      email: "chaitanya@neevachi.in"
+    },
+    {
+      name: "Piyush Bhoi",
+      role: "Hardware Engineer",
+      image: "https://via.placeholder.com/150x150/F59E0B/FFFFFF?text=PB",
+      bio: "Expert in hardware design, PCB development, and embedded systems with a focus on reliable and efficient electronic solutions.",
+      linkedin: "#",
+      github: "#",
+      email: "piyush@neevachi.in"
+    },
+    {
       name: "Pranit Patil",
-      role: "Founder & Lead Engineer",
-      image: "https://via.placeholder.com/150x150/3B82F6/FFFFFF?text=PP",
-      bio: "Expert in robotics and embedded systems with 5+ years of experience in delivering innovative solutions.",
+      role: "Website Developer",
+      image: "https://via.placeholder.com/150x150/6366F1/FFFFFF?text=PP",
+      bio: "Full-stack developer specializing in web applications and digital platforms, ensuring seamless user experiences and robust functionality.",
       linkedin: "#",
       github: "#",
       email: "pranit@neevachi.in"
     },
     {
-      name: "Team Member 2",
-      role: "Embedded Systems Engineer",
-      image: "https://via.placeholder.com/150x150/10B981/FFFFFF?text=TM",
-      bio: "Specialized in microcontroller programming and PCB design with a passion for IoT solutions.",
+      name: "Kalpesh Khalane",
+      role: "Social Media Head",
+      image: "https://via.placeholder.com/150x150/EF4444/FFFFFF?text=KK",
+      bio: "Manages our online presence and community engagement, ensuring our innovations reach a wider audience across digital platforms.",
       linkedin: "#",
       github: "#",
-      email: "team@neevachi.in"
+      email: "kalpesh@neevachi.in"
     },
     {
-      name: "Team Member 3",
-      role: "3D Design Specialist",
-      image: "https://via.placeholder.com/150x150/8B5CF6/FFFFFF?text=TM",
-      bio: "Expert in CAD modeling and 3D printing with extensive experience in rapid prototyping.",
+      name: "Vaibhav Patil",
+      role: "Mentor",
+      image: "https://via.placeholder.com/150x150/14B8A6/FFFFFF?text=VP",
+      bio: "Provides invaluable guidance and expertise, shaping the next generation of technological advancements and strategic direction.",
       linkedin: "#",
       github: "#",
-      email: "team@neevachi.in"
-    },
-    {
-      name: "Team Member 4",
-      role: "Software Developer",
-      image: "https://via.placeholder.com/150x150/F59E0B/FFFFFF?text=TM",
-      bio: "Full-stack developer specializing in web applications and IoT platform integration.",
-      linkedin: "#",
-      github: "#",
-      email: "team@neevachi.in"
+      email: "vaibhav@neevachi.in"
     },
   ];
+
+  const teamDescription = "Our diverse team comprises visionary leaders, skilled engineers, and experienced mentors, all dedicated to pushing the boundaries of technology and delivering exceptional solutions.";
 
   const stats = [
     { value: "5+", label: "Years Experience" },
@@ -120,6 +158,61 @@ const About = () => {
                 <p className="text-gray-600">{item.desc}</p>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Details */}
+      <section className="py-20 px-4 bg-white">
+        <div className="container mx-auto max-w-7xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Our Mission</h2>
+            <p className="text-gray-600 text-lg max-w-3xl mx-auto">
+              Engineering innovative hardware that empowers industries, improves lives, and contributes to a better future
+            </p>
+          </motion.div>
+
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-gray-200"
+            >
+              <ul className="space-y-4">
+                {[
+                  "Engineer innovative hardware solutions that push the boundaries of technology",
+                  "Empower industries with cutting-edge automation and robotics systems",
+                  "Improve lives through smart IoT and embedded system applications",
+                  "Contribute to a sustainable and better future through responsible technology",
+                  "Transform visionary concepts into intelligent engineering solutions",
+                  "Solve real-world challenges with practical and scalable technology"
+                ].map((item, index) => (
+                  <motion.li
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                    className="flex items-start gap-3"
+                  >
+                    <div className="p-1 rounded-full bg-blue-600 text-white mt-1">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-700">{item}</span>
+                  </motion.li>
+                ))}
+              </ul>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -200,7 +293,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* Leadership & Team Section */}
       <section className="py-20 px-4 bg-white">
         <div className="container mx-auto max-w-7xl">
           <motion.div
@@ -210,13 +303,13 @@ const About = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Meet Our Team</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Leadership & Team</h2>
             <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-              The talented individuals behind Neevachi Solutions' success
+              {teamDescription}
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
             {teamMembers.map((member, index) => (
               <motion.div
                 key={member.name}
@@ -378,6 +471,26 @@ const About = () => {
               <p className="text-gray-600 text-sm">27GYTPM3198G1ZK</p>
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* Closing Message */}
+      <section className="py-20 px-4 bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+        <div className="container mx-auto max-w-4xl text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">Thank You for Your Interest</h2>
+            <p className="text-xl mb-8 max-w-3xl mx-auto text-blue-100">
+              We are committed to delivering excellence in every project and building lasting partnerships with our clients. Your trust drives us to innovate and exceed expectations.
+            </p>
+            <p className="text-lg mb-10 max-w-2xl mx-auto text-blue-200">
+              Together, let's create solutions that make a difference and shape the future of technology.
+            </p>
+          </motion.div>
         </div>
       </section>
 
