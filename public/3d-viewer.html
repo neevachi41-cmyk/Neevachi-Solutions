@@ -222,18 +222,43 @@
 
         // Handle messages from parent window
         function handleParentMessage(event) {
+            console.log('Message received from parent:', event.data);
+            
             if (event.data && event.data.type === 'loadModel') {
-                // Create a File object from the URL
-                fetch(event.data.fileUrl)
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const file = new File([blob], event.data.fileName, { type: blob.type });
+                // Handle base64 data
+                if (event.data.fileData) {
+                    console.log('Loading model from base64 data');
+                    try {
+                        // Convert base64 to blob
+                        const base64Data = event.data.fileData.split(',')[1];
+                        const byteCharacters = atob(base64Data);
+                        const byteNumbers = new Array(byteCharacters.length);
+                        for (let i = 0; i < byteCharacters.length; i++) {
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+                        const file = new File([blob], event.data.fileName, { type: 'application/octet-stream' });
                         loadModel(file);
-                    })
-                    .catch(error => {
-                        console.error('Error loading model from parent:', error);
-                        showToast('Error loading model from parent', 'error');
-                    });
+                    } catch (error) {
+                        console.error('Error processing base64 data:', error);
+                        showToast('Error processing base64 data', 'error');
+                    }
+                }
+                // Handle file URL (fallback)
+                else if (event.data.fileUrl) {
+                    console.log('Loading model from URL');
+                    fetch(event.data.fileUrl)
+                        .then(response => response.blob())
+                        .then(blob => {
+                            const file = new File([blob], event.data.fileName, { type: blob.type });
+                            loadModel(file);
+                        })
+                        .catch(error => {
+                            console.error('Error loading model from parent:', error);
+                            showToast('Error loading model from parent', 'error');
+                        });
+                }
             } else if (event.data && event.data.type === 'updateColor') {
                 // Update model color
                 updateModelColor(event.data.color);

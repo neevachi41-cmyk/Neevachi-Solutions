@@ -96,6 +96,7 @@ const PrintingService = () => {
   const [dragActive, setDragActive] = useState(false);
   const [fileUnit, setFileUnit] = useState<'mm' | 'inch'>('mm');
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
+  const [iframeLoaded, setIframeLoaded] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   
   // Step wizard state
@@ -588,34 +589,39 @@ const PrintingService = () => {
 
   // Send file to iframe viewer
   const sendFileToIframe = (file: File) => {
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      // Create object URL for the file
-      const fileUrl = URL.createObjectURL(file);
-      
-      console.log('Sending file to iframe:', file.name, 'URL:', fileUrl);
-      
-      // Wait for iframe to be ready, then send message
-      setTimeout(() => {
-        if (iframeRef.current && iframeRef.current.contentWindow) {
-          // Send message to iframe with file info
-          iframeRef.current.contentWindow.postMessage({
-            type: 'loadModel',
-            fileUrl: fileUrl,
-            fileName: file.name
-          }, '*');
-          
-          console.log('Message sent to iframe');
-          
-          // Revoke URL after a longer delay to allow loading
-          setTimeout(() => {
-            URL.revokeObjectURL(fileUrl);
-            console.log('URL revoked');
-          }, 30000);
-        }
-      }, 500); // Wait 500ms for iframe to be ready
-    } else {
-      console.error('Iframe or contentWindow not available');
+    console.log('sendFileToIframe called, iframeLoaded:', iframeLoaded);
+    
+    if (!iframeRef.current) {
+      console.error('Iframe ref is null');
+      return;
     }
+
+    if (!iframeRef.current.contentWindow) {
+      console.error('Iframe contentWindow is not available');
+      return;
+    }
+
+    // Convert file to base64 and send as data URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target?.result as string;
+      console.log('File converted to base64, length:', base64.length);
+      
+      // Send message to iframe with base64 data
+      iframeRef.current.contentWindow.postMessage({
+        type: 'loadModel',
+        fileData: base64,
+        fileName: file.name
+      }, '*');
+      
+      console.log('Message sent to iframe with base64 data');
+    };
+    
+    reader.onerror = () => {
+      console.error('Error reading file as base64');
+    };
+    
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
