@@ -608,27 +608,24 @@ const PrintingService = () => {
       return;
     }
 
-    // Convert file to base64 and send as data URL
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const base64 = e.target?.result as string;
-      console.log('File converted to base64, length:', base64.length);
-      
-      // Send message to iframe with base64 data
-      iframeRef.current.contentWindow.postMessage({
-        type: 'loadModel',
-        fileData: base64,
-        fileName: file.name
-      }, '*');
-      
-      console.log('Message sent to iframe with base64 data');
-    };
+    // Create object URL for the file
+    const fileUrl = URL.createObjectURL(file);
+    console.log('Created object URL:', fileUrl);
     
-    reader.onerror = () => {
-      console.error('Error reading file as base64');
-    };
+    // Send message to iframe with file URL
+    iframeRef.current.contentWindow.postMessage({
+      type: 'loadModel',
+      fileUrl: fileUrl,
+      fileName: file.name
+    }, '*');
     
-    reader.readAsDataURL(file);
+    console.log('Message sent to iframe with file URL');
+    
+    // Revoke URL after a delay
+    setTimeout(() => {
+      URL.revokeObjectURL(fileUrl);
+      console.log('URL revoked');
+    }, 30000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -841,9 +838,10 @@ const PrintingService = () => {
                             setIframeLoaded(true);
                             // Send file to iframe after it loads
                             if (uploadedFiles.length > 0 && uploadedFiles[0].file) {
+                              console.log('Sending file to iframe after load');
                               setTimeout(() => {
                                 sendFileToIframe(uploadedFiles[0].file!);
-                              }, 500);
+                              }, 1000);
                             }
                           }}
                         />

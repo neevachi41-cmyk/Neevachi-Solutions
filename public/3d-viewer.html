@@ -225,8 +225,27 @@
             console.log('Message received from parent:', event.data);
             
             if (event.data && event.data.type === 'loadModel') {
-                // Handle base64 data
-                if (event.data.fileData) {
+                // Handle file URL
+                if (event.data.fileUrl) {
+                    console.log('Loading model from URL:', event.data.fileUrl);
+                    fetch(event.data.fileUrl)
+                        .then(response => {
+                            console.log('Fetch response:', response);
+                            return response.blob();
+                        })
+                        .then(blob => {
+                            console.log('Blob created, size:', blob.size);
+                            const file = new File([blob], event.data.fileName, { type: blob.type });
+                            console.log('File object created:', file);
+                            loadModel(file);
+                        })
+                        .catch(error => {
+                            console.error('Error loading model from parent:', error);
+                            showToast('Error loading model from parent: ' + error.message, 'error');
+                        });
+                }
+                // Handle base64 data (fallback)
+                else if (event.data.fileData) {
                     console.log('Loading model from base64 data');
                     try {
                         // Convert base64 to blob
@@ -244,20 +263,6 @@
                         console.error('Error processing base64 data:', error);
                         showToast('Error processing base64 data', 'error');
                     }
-                }
-                // Handle file URL (fallback)
-                else if (event.data.fileUrl) {
-                    console.log('Loading model from URL');
-                    fetch(event.data.fileUrl)
-                        .then(response => response.blob())
-                        .then(blob => {
-                            const file = new File([blob], event.data.fileName, { type: blob.type });
-                            loadModel(file);
-                        })
-                        .catch(error => {
-                            console.error('Error loading model from parent:', error);
-                            showToast('Error loading model from parent', 'error');
-                        });
                 }
             } else if (event.data && event.data.type === 'updateColor') {
                 // Update model color
