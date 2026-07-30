@@ -592,17 +592,29 @@ const PrintingService = () => {
       // Create object URL for the file
       const fileUrl = URL.createObjectURL(file);
       
-      // Send message to iframe with file info
-      iframeRef.current.contentWindow.postMessage({
-        type: 'loadModel',
-        fileUrl: fileUrl,
-        fileName: file.name
-      }, '*');
+      console.log('Sending file to iframe:', file.name, 'URL:', fileUrl);
       
-      // Revoke URL after a delay to allow loading
+      // Wait for iframe to be ready, then send message
       setTimeout(() => {
-        URL.revokeObjectURL(fileUrl);
-      }, 10000);
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+          // Send message to iframe with file info
+          iframeRef.current.contentWindow.postMessage({
+            type: 'loadModel',
+            fileUrl: fileUrl,
+            fileName: file.name
+          }, '*');
+          
+          console.log('Message sent to iframe');
+          
+          // Revoke URL after a longer delay to allow loading
+          setTimeout(() => {
+            URL.revokeObjectURL(fileUrl);
+            console.log('URL revoked');
+          }, 30000);
+        }
+      }, 500); // Wait 500ms for iframe to be ready
+    } else {
+      console.error('Iframe or contentWindow not available');
     }
   };
 
