@@ -566,6 +566,97 @@ const PrintingService = () => {
     }
   }, [settings.printer, settings.infill, settings.supports, estimatePrintTime, uploadedFiles.length, fileUnit]);
 
+  // Direct Three.js viewer setup
+  useEffect(() => {
+    if (!viewerRef.current || uploadedFiles.length === 0 || !uploadedFiles[0].geometry) return;
+
+    const container = viewerRef.current;
+    const geometry = uploadedFiles[0].geometry;
+    const colorHex = colorMap[settings.color] || 0x808080;
+
+    // Clean up previous scene
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+
+    // Create Three.js scene
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xffffff);
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(5, 5, 5);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    // Add lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    directionalLight.position.set(10, 10, 10);
+    scene.add(directionalLight);
+
+    // Add grid
+    const gridHelper = new THREE.GridHelper(10, 10, 0xcccccc, 0xe5e5e5);
+    scene.add(gridHelper);
+
+    // Create mesh from geometry
+    const material = new THREE.MeshStandardMaterial({ 
+      color: colorHex,
+      metalness: 0.5,
+      roughness: 0.5
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    
+    // Center and scale mesh
+    const box = new THREE.Box3().setFromObject(mesh);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const scale = 2 / maxDim;
+    mesh.scale.set(scale, scale, scale);
+    
+    const scaledBox = new THREE.Box3().setFromObject(mesh);
+    const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
+    mesh.position.set(-scaledCenter.x, -scaledBox.min.y, -scaledCenter.z);
+    
+    scene.add(mesh);
+
+    // Add controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.target.copy(scaledCenter);
+
+    // Animation loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    // Handle resize
+    const handleResize = () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    };
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      container.removeChild(renderer.domElement);
+      renderer.dispose();
+      geometry.dispose();
+      material.dispose();
+    };
+  }, [uploadedFiles, settings.color, colorMap]);
+
   // Update model color when color changes
   useEffect(() => {
     if (settings.color) {
@@ -828,25 +919,10 @@ const PrintingService = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {/* 3D Model Viewer - Iframe */}
-                    {uploadedFiles.length > 0 && (
+                    {/* 3D Model Viewer - Direct Canvas */}
+                    {uploadedFiles.length > 0 && uploadedFiles[0].geometry && (
                       <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
-                        <iframe
-                          ref={iframeRef}
-                          src="/3d-viewer.html"
-                          className="w-full h-[500px]"
-                          title="3D Model Viewer"
-                          onLoad={() => {
-                            console.log('Iframe loaded successfully');
-                            setIframeLoaded(true);
-                            // Send file to iframe after it loads
-                            if (uploadedFiles.length > 0 && uploadedFiles[0].file) {
-                              setTimeout(() => {
-                                sendFileToIframe(uploadedFiles[0].file!);
-                              }, 500);
-                            }
-                          }}
-                        />
+                        <div ref={viewerRef} className="w-full h-[500px] bg-white" />
                       </div>
                     )}
                     
