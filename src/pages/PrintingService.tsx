@@ -53,6 +53,7 @@ interface UploadedFile {
   id: string;
   name: string;
   size: number;
+  file?: File; // Store the actual file for 3D viewer
   volume?: number; // in cm³
   estimatedWeight?: number; // in grams
   dimensions?: {
@@ -98,6 +99,8 @@ const PrintingService = () => {
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const viewerRef = useRef<HTMLDivElement>(null);
+  const [threeScene, setThreeScene] = useState<any>(null);
   
   // Step wizard state
   const [currentStep, setCurrentStep] = useState(0);
@@ -501,6 +504,7 @@ const PrintingService = () => {
           id: Math.random().toString(36).substr(2, 9),
           name: file.name,
           size: file.size,
+          file: file, // Store actual file
           volume: volume,
           estimatedWeight: estimatedWeight,
           dimensions: dimensions,
@@ -519,6 +523,7 @@ const PrintingService = () => {
           id: Math.random().toString(36).substr(2, 9),
           name: file.name,
           size: file.size,
+          file: file, // Store actual file
           volume: estimatedVolume,
           estimatedWeight: estimatedWeight,
           dimensions: estimatedDimensions,
@@ -533,11 +538,13 @@ const PrintingService = () => {
       console.log('Adding files to state:', newFiles.map(f => ({ name: f.name, hasGeometry: !!f.geometry })));
       setUploadedFiles(prev => [...prev, ...newFiles]);
       
-      // Send the first file to the iframe viewer
+      // Send the first file to the iframe viewer after a delay
       if (newFiles.length > 0) {
         setTimeout(() => {
-          sendFileToIframe(fileArray[0]);
-        }, 100);
+          if (newFiles[0].file) {
+            sendFileToIframe(newFiles[0].file);
+          }
+        }, 1500); // Wait longer for iframe to be ready
       }
       
       toast.success(`${newFiles.length} file(s) uploaded successfully`);
@@ -829,7 +836,18 @@ const PrintingService = () => {
                           src="/3d-viewer.html"
                           className="w-full h-[500px]"
                           title="3D Model Viewer"
-                          sandbox="allow-scripts"
+                          sandbox="allow-scripts allow-same-origin"
+                          onLoad={() => {
+                            console.log('Iframe loaded successfully');
+                            setIframeLoaded(true);
+                            // Send file to iframe after it loads
+                            if (uploadedFiles.length > 0) {
+                              const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+                              if (fileInput && fileInput.files && fileInput.files[0]) {
+                                sendFileToIframe(fileInput.files[0]);
+                              }
+                            }
+                          }}
                         />
                       </div>
                     )}
