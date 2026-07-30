@@ -836,16 +836,14 @@ const PrintingService = () => {
                           src="/3d-viewer.html"
                           className="w-full h-[500px]"
                           title="3D Model Viewer"
-                          sandbox="allow-scripts allow-same-origin"
                           onLoad={() => {
                             console.log('Iframe loaded successfully');
                             setIframeLoaded(true);
                             // Send file to iframe after it loads
-                            if (uploadedFiles.length > 0) {
-                              const fileInput = document.getElementById('file-upload') as HTMLInputElement;
-                              if (fileInput && fileInput.files && fileInput.files[0]) {
-                                sendFileToIframe(fileInput.files[0]);
-                              }
+                            if (uploadedFiles.length > 0 && uploadedFiles[0].file) {
+                              setTimeout(() => {
+                                sendFileToIframe(uploadedFiles[0].file!);
+                              }, 500);
                             }
                           }}
                         />
